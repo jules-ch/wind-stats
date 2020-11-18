@@ -1,0 +1,10 @@
+*.py[cd]
+.coverage
+.ipynb_checkpoints
+.mypy_cache
+.pytest_cache
+.vscode
+
+__pycache__
+build
+dist

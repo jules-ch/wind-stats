@@ -1,19 +1,18 @@
 """GWC file reader module
 
 This module provides utilies to read GWC files from Global Wind Atlas.
-Enabling computation of Weibull distribution parmaters based on roughness 
+Enabling computation of Weibull distribution paramaters based on roughness 
 length & height of the wind turbine hub.
 
 Weibull parameters interpolations & solver is based on the methodology outlined 
 in the European Wind Atlas publication.
 
-
 References: 
     - https://globalwindatlas.info/
     - Troen, I., & Lundtang Petersen, E. (1989). European Wind Atlas. Risø National Laboratory.
 """
+import logging
 import re
-from pathlib import Path
 from typing import List, Protocol, Union
 
 import numpy as np
@@ -23,19 +22,21 @@ from scipy.interpolate.interpolate import interp1d
 from scipy.optimize import root_scalar
 from scipy.special import gamma
 
+logger = logging.getLogger(__name__)
+
 
 class SupportsRead(Protocol):
-    def read(self, amount: int) -> bytes:
+    def read(self, amount: int = -1) -> str:
         ...
 
 
 class GWAReader:
     @staticmethod
-    def loads(s: Union[str, bytes], enconding="ASCII") -> xr.Dataset:
+    def loads(s: Union[str, bytes], encoding="ASCII") -> xr.Dataset:
         """Deserialize s (a str, bytes or bytearray instance containing a GWC document) to Dataset."""
 
         if not isinstance(s, str):
-            s = s.decode(enconding)
+            s = s.decode(encoding)
         pattern = "<coordinates>(.*)</coordinates>"
 
         lines = s.splitlines()
@@ -86,7 +87,7 @@ class GWAReader:
         return GWAReader.loads(fp.read())
 
 
-def compute_weibull_parameters(A: List[float], k: List[float], f: List[float]):
+def _compute_weibull_parameters(A: List[float], k: List[float], f: List[float]):
 
     """Compute global weibull parameters based on A, k parameters & frequency for each wind sector.
 
@@ -94,10 +95,10 @@ def compute_weibull_parameters(A: List[float], k: List[float], f: List[float]):
     2. Compute weighted sum of squared means u².
     3. Solve k with the following equation :
         ..math:
-            \frac{M^2}{u^2} = \frac{\Gamma^2(1+\frac{1}{k})}{\Gamma(1+\frac{2}{k})}
+            \frac{M^2}{u^2} = \frac{\\Gamma^2(1+\frac{1}{k})}{\\Gamma(1+\frac{2}{k})}
     4.  Solve A with following equation :
         ..math:
-            M = A \cdot \Gamma(1+\frac{1}{k})
+            M = A \\cdot \\Gamma(1+\frac{1}{k})
 
     Args:
         A: List of A Weibull parameters for each wind sector.
@@ -113,7 +114,8 @@ def compute_weibull_parameters(A: List[float], k: List[float], f: List[float]):
     M = np.average(means, weights=f)  # Normalizing the average
     u2 = np.average(mean_squared, weights=f)  # Normalizing the average
 
-    # solve k
+    # solve A, k
+    logger.debug("Solving A,k parameters")
     equation_k = lambda k: (gamma(1 + 1 / k) ** 2 / gamma(1 + 2 / k)) - (M ** 2 / u2)
     k_solution = root_scalar(equation_k, method="brentq", bracket=[1, 50])
     k = k_solution.root
@@ -156,24 +158,20 @@ def get_weibull_parameters(ds: xr.Dataset, roughness_lengths, height):
             new_log_roughness = np.nan_to_num(np.log(roughness))
         new_log_height = np.log(new_height)
 
-        new_A = np.asscalar(
-            interp2d(log_height, log_roughness, A)(new_log_height, new_log_roughness)
-        )
-        new_k = np.asscalar(
-            interp2d(log_height, log_roughness, k)(new_log_height, new_log_roughness)
-        )
+        new_A = interp2d(log_height, log_roughness, A)(
+            new_log_height, new_log_roughness
+        ).item()
+        new_k = interp2d(log_height, log_roughness, k)(
+            new_log_height, new_log_roughness
+        ).item()
 
         frequencies = sector_data.frequency
 
-        new_f = np.asscalar(
-            interp1d(
-                log_roughness, frequencies, bounds_error=False, fill_value="extrapolate"
-            )(new_log_roughness)
-        )
+        new_f = interp1d(log_roughness, frequencies)(new_log_roughness).item()
 
         A_parameters.append(new_A)
         k_parameters.append(new_k)
         f_parameters.append(new_f)
 
-    A, k = compute_weibull_parameters(A_parameters, k_parameters, f_parameters)
-    return A, k
+    A, k = _compute_weibull_parameters(A_parameters, k_parameters, f_parameters)
+    return A, k, f_parameters

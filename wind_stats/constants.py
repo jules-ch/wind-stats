@@ -1,6 +1,4 @@
-from pint import UnitRegistry
+from .units import units
 
-UREG = UnitRegistry()
-UREG.default_format = ".3f~P"
-
-AIR_DENSITY = 1.225 * UREG("kg/m**3")
+AIR_DENSITY = 1.225 * units("kg/m**3")
+KARMAN_CONSTANT = 0.4

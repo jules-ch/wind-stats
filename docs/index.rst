@@ -7,8 +7,12 @@ Welcome to wind-stats's documentation!
 ======================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
+
+   getting-started
+   shelter_model
+   api
 
 
 

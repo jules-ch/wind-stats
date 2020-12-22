@@ -1,3 +1,5 @@
+"""Wind stats units support module."""
+
 from pint import UnitRegistry
 
 units = UnitRegistry()

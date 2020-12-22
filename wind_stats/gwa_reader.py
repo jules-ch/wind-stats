@@ -1,19 +1,20 @@
 """GWC file reader module
 
 This module provides utilies to read GWC files from Global Wind Atlas.
-Enabling computation of Weibull distribution paramaters based on roughness 
+Enabling computation of Weibull distribution parameters based on roughness
 length & height of the wind turbine hub.
 
-Weibull parameters interpolations & solver is based on the methodology outlined 
-in the European Wind Atlas publication.
+Weibull parameters interpolations & solver is based on the methodology
+outlined in the European Wind Atlas publication.
 
-References: 
-    - https://globalwindatlas.info/
-    - Troen, I., & Lundtang Petersen, E. (1989). European Wind Atlas. Risø National Laboratory.
+References
+----------
+https://globalwindatlas.info/
+Troen, I., & Lundtang Petersen, E. (1989). European Wind Atlas. Risø National Laboratory.
 """
 import logging
 import re
-from typing import List, Protocol, Union
+from typing import List, Tuple, Union
 
 import numpy as np
 import xarray as xr
@@ -21,6 +22,11 @@ from scipy.interpolate import interp2d
 from scipy.interpolate.interpolate import interp1d
 from scipy.optimize import root_scalar
 from scipy.special import gamma
+
+try:
+    from typing import Protocol
+except ImportError:
+    from typing_extensions import Protocol
 
 logger = logging.getLogger(__name__)
 
@@ -32,8 +38,9 @@ class SupportsRead(Protocol):
 
 class GWAReader:
     @staticmethod
-    def loads(s: Union[str, bytes], encoding="ASCII") -> xr.Dataset:
-        """Deserialize s (a str, bytes or bytearray instance containing a GWC document) to Dataset."""
+    def loads(s: Union[str, bytes], encoding: str = "ASCII") -> xr.Dataset:
+        """Deserialize s (a str, bytes or bytearray instance containing a
+        GWC document) to Dataset."""
 
         if not isinstance(s, str):
             s = s.decode(encoding)
@@ -43,7 +50,12 @@ class GWAReader:
         roughness_classes, heights_count, sectors_count = map(int, lines[1].split())
         sectors = [360 / sectors_count * i for i in range(sectors_count)]
 
-        latitude, longitude, _ = map(float, re.search(pattern, s).group(1).split(","))
+        coordinates_match = re.search(pattern, s)
+
+        if coordinates_match:
+            latitude, longitude, _ = map(float, coordinates_match.group(1).split(","))
+        else:
+            raise ValueError("coordinates not found in the GWC file")
         coordinates = (latitude, longitude)
         roughness_lengths = list(map(float, lines[2].split()))
         heights = list(map(float, lines[3].split()))
@@ -89,7 +101,10 @@ class GWAReader:
 
 def _compute_weibull_parameters(A: List[float], k: List[float], f: List[float]):
 
-    """Compute global weibull parameters based on A, k parameters & frequency for each wind sector.
+    r"""Compute global weibull parameters.
+
+    Computation is based on A, k weibull parameters & frequency for each
+    wind sector.
 
     1. Compute weighted sum of means for each sector M.
     2. Compute weighted sum of squared means u².
@@ -100,12 +115,22 @@ def _compute_weibull_parameters(A: List[float], k: List[float], f: List[float]):
         ..math:
             M = A \\cdot \\Gamma(1+\frac{1}{k})
 
-    Args:
-        A: List of A Weibull parameters for each wind sector.
-        k: List of k Weibull parameters for each wind sector.
-        f: List frequencies for wind direction originating from wind sector.
+    Parameters
+    ----------
+    A: list
+        List of A Weibull parameters for each wind sector.
+    k: list
+        List of k Weibull parameters for each wind sector.
+    f: list
+        List frequencies for wind direction originating from wind sector.
 
-    Reference:
+    Returns
+    -------
+    parameters: tuple
+       Global weibull parameters.
+
+    References
+    ----------
         - https://orbit.dtu.dk/files/112135732/European_Wind_Atlas.pdf
     """
 
@@ -116,38 +141,50 @@ def _compute_weibull_parameters(A: List[float], k: List[float], f: List[float]):
 
     # solve A, k
     logger.debug("Solving A,k parameters")
-    equation_k = lambda k: (gamma(1 + 1 / k) ** 2 / gamma(1 + 2 / k)) - (M ** 2 / u2)
+
+    def equation_k(k: float) -> float:
+        return (gamma(1 + 1 / k) ** 2 / gamma(1 + 2 / k)) - (M ** 2 / u2)
+
     k_solution = root_scalar(equation_k, method="brentq", bracket=[1, 50])
-    k = k_solution.root
+    new_k = k_solution.root
 
-    equation_A = lambda A: A * gamma(1 + 1 / k) - M
+    def equation_A(A):
+        return A * gamma(1 + 1 / new_k) - M
+
     A_solution = root_scalar(equation_A, method="brentq", bracket=[1, 50])
-    A = A_solution.root
-    return A, k
+    new_A = A_solution.root
+    return new_A, new_k
 
 
-def get_weibull_parameters(ds: xr.Dataset, roughness_lengths, height):
+def get_weibull_parameters(
+    ds: xr.Dataset, roughness_lengths: List[float], height: float
+) -> Tuple[float, float, List[float]]:
     """Get A, k Weibull parameters based on GWA dataset files.
 
-    It computes based on roughness length & height for each wind rose sector.
+    It computes based on roughness length & height for each wind rose
+    sector.
 
-    Args:
-        roughness_lengths: array of 12 roughness lengths.
-        height: height at which wind is measured.
+    Parameters
+    ----------
+    ds: xr.Dataset
+        dataset read from GWC file.
+    roughness_lengths:
+        array of 12 roughness lengths for each azimuthal wind sector (30°).
+    height:  float
+        height at which wind is measured.
 
-    Returns:
-        A, k : A, k for global weibull
-
+    Returns
+    -------
+    parameters: tuple
+        Global weibull parameters & normalized frequencies for each sector.
     """
 
-    new_roughness = roughness_lengths
-    new_height = height
     A_parameters = []
     k_parameters = []
     f_parameters = []
 
     # Interpolate for each wind sector.
-    for sector_index, roughness in enumerate(new_roughness):
+    for sector_index, roughness in enumerate(roughness_lengths):
         sector_data = ds.isel(sector=sector_index)
         A = sector_data.A
         k = sector_data.k
@@ -156,7 +193,7 @@ def get_weibull_parameters(ds: xr.Dataset, roughness_lengths, height):
         log_height = np.log(sector_data.height)
         with np.errstate(divide="ignore"):
             new_log_roughness = np.nan_to_num(np.log(roughness))
-        new_log_height = np.log(new_height)
+        new_log_height = np.log(height)
 
         new_A = interp2d(log_height, log_roughness, A)(
             new_log_height, new_log_roughness
@@ -175,3 +212,21 @@ def get_weibull_parameters(ds: xr.Dataset, roughness_lengths, height):
 
     A, k = _compute_weibull_parameters(A_parameters, k_parameters, f_parameters)
     return A, k, f_parameters
+
+
+def get_gwc_data(latitude: float, longitude: float) -> xr.Dataset:
+
+    """Get GWC file from GLoabal Wind Atlas API."""
+
+    try:
+        import requests
+    except ImportError:
+        raise ImportError("requests is needed to download gwc file")
+
+    response = requests.get(
+        "https://globalwindatlas.info/api/gwa/custom/Lib/",
+        params={"lat": latitude, "long": longitude},
+        headers={"Referer": "https://globalwindatlas.info"},
+    )
+
+    return GWAReader.loads(response.content)

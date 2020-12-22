@@ -1,11 +1,11 @@
-from typing import Tuple, Union
+from typing import Union
 
 import numpy as np
 
-from wind_stats.constants import KARMAN_CONSTANT
+from .constants import KARMAN_CONSTANT
 
 
-def wind_speed_reduction(
+def wemod_wind_speed_reduction(
     x_L: float,
     y_L: float,
     x_R: float,
@@ -15,8 +15,10 @@ def wind_speed_reduction(
     z_0: float,
     C_h: float,
     wind_angle: Union[float, np.ndarray] = 0.0,
-):
-    """Shelter model
+    x_offset=0.0,
+    y_offset=0.0,
+) -> float:
+    r"""Shelter model
 
     WEMOD algorithm outlined in Taylor, P. A. and J. R. Salmon, 1993.
 
@@ -25,20 +27,25 @@ def wind_speed_reduction(
     Parameters
     ----------
 
-    x_L: coordinate on x-axis of the extreme left point of the obstacle.
-    y_L: coordinate on y-axis of the extreme left point of the obstacle.
-    x_R: coordinate on x-axis of the extreme right point of the obstacle.
-    x_R: coordinate on y-axis of the extreme right point of the obstacle.
-    h: height of the obstacle.
+    x_L: float
+        coordinate on x-axis of the extreme left point of the obstacle.
+    y_L: float
+        coordinate on y-axis of the extreme left point of the obstacle.
+    x_R: float
+        coordinate on x-axis of the extreme right point of the obstacle.
+    x_R: float
+        coordinate on y-axis of the extreme right point of the obstacle.
+    h: float
+        height of the obstacle.
     z: height where the speed reduction is measured.
     z_0: roughness length.
     C_h: the normalized wake moment coefficient.
-    wind_angle: wind direction (0 means wind from North)
+    wind_angle: azimuth wind direction (0 means wind from North)
 
     Returns
     -------
 
-    velocity reduction ratio.
+    velocity reduction ratio : float
 
 
     Notes
@@ -54,12 +61,19 @@ def wind_speed_reduction(
     Vertical cylinder                   0.2
     """
 
-    # is_not_scalar = isinstance(wind_angle, (list, tuple, np.ndarray))
+    # Offset coordinates
+    x_L = x_L - x_offset
+    x_R = x_R - x_offset
+    y_L = y_L - y_offset
+    y_R = y_R - y_offset
 
     wind_angle = np.atleast_1d(wind_angle)
 
     alpha_L = np.arctan2(x_L, y_L)
     alpha_R = np.arctan2(x_R, y_R)
+
+    if alpha_R < alpha_L:
+        alpha_R += 2 * np.pi
 
     alpha_R += 2 * np.pi if alpha_R == 0 else 0
 
@@ -67,32 +81,34 @@ def wind_speed_reduction(
     intervals = int(abs(alpha_R - alpha_L) // np.radians(0.1))
     delta_beta = abs(alpha_R - alpha_L) / intervals
 
-    beta_i = np.linspace(alpha_L + delta_beta / 2, alpha_R - delta_beta / 2, intervals)
+    beta_i = np.linspace(
+        alpha_L + delta_beta / 2, alpha_R - delta_beta / 2, intervals
+    ) % (2 * np.pi)
     psi = np.radians(wind_angle)
 
     psi, beta_i = np.meshgrid(psi, beta_i)
 
-    R_i = ((x_R * y_L) - (x_L * y_R)) / (
+    radii = ((x_R * y_L) - (x_L * y_R)) / (
         (x_R - x_L) * np.cos(beta_i) - (y_R - y_L) * np.sin(beta_i)
     )
     Γ = 12.1875
 
     if (x_R - x_L) == 0:
-        gamma = np.pi / 2 if (y_L > y_R) > 0 else -np.pi / 2
+        gamma = np.pi / 2 if (y_L > y_R) > 0 else 3 * np.pi / 2
     elif (y_L - y_R) == 0:
         gamma = np.pi if (x_L > x_R) > 0 else 0
     else:
-        gamma = np.arctan((y_L - y_R) / (x_R - x_L))
+        gamma = np.arctan((y_L - y_R) / (x_R - x_L)) % (2 * np.pi)
 
     width_i = (
         2
-        * R_i
+        * radii
         * np.sin(delta_beta / 2)
-        * (1 / np.cos(beta_i - gamma))
+        * (1 / np.abs(np.cos(beta_i - gamma)))
         * np.abs(np.cos(psi - gamma))
     )
 
-    x_i, y_i = R_i * np.cos(psi - beta_i), R_i * np.sin(psi - beta_i)
+    x_i, y_i = radii * np.cos(psi - beta_i), radii * np.sin(psi - beta_i)
 
     n = 1 / 7
 

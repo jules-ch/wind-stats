@@ -15,6 +15,7 @@ Troen, I., & Lundtang Petersen, E. (1989). European Wind Atlas. Risø National L
 import logging
 import re
 from typing import List, Tuple, Union
+from urllib.request import Request, urlopen
 
 import numpy as np
 import xarray as xr
@@ -157,7 +158,7 @@ def _compute_weibull_parameters(A: List[float], k: List[float], f: List[float]):
 
 
 def get_weibull_parameters(
-    ds: xr.Dataset, roughness_lengths: List[float], height: float
+    ds: xr.Dataset, roughness_length: Union[List[float], float], height: float
 ) -> Tuple[float, float, List[float]]:
     """Get A, k Weibull parameters based on GWA dataset files.
 
@@ -168,8 +169,9 @@ def get_weibull_parameters(
     ----------
     ds: xr.Dataset
         dataset read from GWC file.
-    roughness_lengths:
-        array of 12 roughness lengths for each azimuthal wind sector (30°).
+    roughness_length:
+        array of 12 roughness lengths for each azimuthal wind sector (30°)
+        or a global roughness_length.
     height:  float
         height at which wind is measured.
 
@@ -183,8 +185,11 @@ def get_weibull_parameters(
     k_parameters = []
     f_parameters = []
 
+    if isinstance(roughness_length, float):
+        roughness_length = [roughness_length] * 12
+
     # Interpolate for each wind sector.
-    for sector_index, roughness in enumerate(roughness_lengths):
+    for sector_index, roughness in enumerate(roughness_length):
         sector_data = ds.isel(sector=sector_index)
         A = sector_data.A
         k = sector_data.k
@@ -216,17 +221,18 @@ def get_weibull_parameters(
 
 def get_gwc_data(latitude: float, longitude: float) -> xr.Dataset:
 
-    """Get GWC file from GLoabal Wind Atlas API."""
+    """Get GWC file from Global Wind Atlas API.
 
-    try:
-        import requests
-    except ImportError:
-        raise ImportError("requests is needed to download gwc file")
+    Notes
+    -----
+    See Global Wind Atlas Term of Use :
+    https://globalwindatlas.info/about/TermsOfUse
+    """
 
-    response = requests.get(
-        "https://globalwindatlas.info/api/gwa/custom/Lib/",
-        params={"lat": latitude, "long": longitude},
+    request = Request(
+        f"https://globalwindatlas.info/api/gwa/custom/Lib/?lat={latitude}&long={longitude}",
         headers={"Referer": "https://globalwindatlas.info"},
     )
-
-    return GWAReader.loads(response.content)
+    with urlopen(request) as f:
+        data = GWAReader.load(f)
+    return data

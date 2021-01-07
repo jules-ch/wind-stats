@@ -137,3 +137,38 @@ def wemod_wind_speed_reduction(
         )
 
     return np.nansum(wind_reductions, axis=0)
+
+
+def vertical_wind_profile(
+    height,
+    roughness_length,
+    reference_height,
+    reference_wind_speed,
+    zero_displacement_plane=0.0,
+):
+
+    """
+    Log Wind profile
+
+
+    Parameters
+    ----------
+    height:
+        height where wind speed is evaluated.
+    roughness_length:
+        roughness length parameter in meters.
+    reference_height:
+        reference height where reference wind speed is measured.
+
+    Returns
+    -------
+    wind_speed
+    """
+
+    wind_speed = (
+        reference_wind_speed
+        * (np.log(height - zero_displacement_plane) / roughness_length)
+        / (np.log(reference_height - zero_displacement_plane) / roughness_length)
+    )
+
+    return wind_speed

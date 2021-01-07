@@ -1,7 +1,6 @@
 """Geometry operations module.
 
 Basic affine 2D transformations."""
-
 from math import cos, pi, sin
 from typing import Tuple
 
@@ -34,7 +33,12 @@ def affine_2d_transformation(coordinates, matrix):
     return x_new, y_new
 
 
-def rotate(coordinates, angle, origin: Tuple[float, float], use_radians=False):
+def rotate(
+    coordinates,
+    angle: float = 0,
+    origin: Tuple[float, float] = (0, 0),
+    use_radians=False,
+):
     """Returns rotated coordinates.
     The angle of rotation can be specified in either degrees (default) or
     radians by setting ``use_radians=True``.

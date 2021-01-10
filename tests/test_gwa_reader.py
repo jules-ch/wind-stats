@@ -1,9 +1,10 @@
 from pathlib import Path
 
+import httpretty
 import numpy as np
 from numpy.testing import assert_array_equal
 
-from wind_stats.gwa_reader import GWAReader, get_weibull_parameters
+from wind_stats.gwa_reader import GWAReader, get_gwc_data, get_weibull_parameters
 
 test_file = Path(__file__).parent / "gwa3_gwc_test_file.lib"
 
@@ -15,12 +16,34 @@ def test_get_weibull_parameters():
     assert A, k
 
 
+@httpretty.activate
+def test_get_gwa_data():
+
+    latitude = 49.056
+    longitude = 0.667
+
+    httpretty.register_uri(
+        httpretty.GET,
+        uri=f"https://globalwindatlas.info/api/gwa/custom/Lib/?lat={latitude}&long={longitude}",
+        status=200,
+        content_type="application/octet-stream",
+        body=test_file.read_bytes(),
+    )
+
+    dataset = get_gwc_data(latitude, longitude)
+    assert dataset.coordinates == (latitude, longitude)
+
+
 class TestGWAReader:
+    def test_loads(self):
+        reader = GWAReader()
+        reader.loads(test_file.read_bytes())
+
     def test_load(self):
         reader = GWAReader()
         dataset = reader.load(test_file.open())
         assert dataset
-        assert dataset.coordinates == (0.667, 49.056)
+        assert dataset.coordinates == (49.056, 0.667)
         assert_array_equal(
             dataset.A,
             np.array(

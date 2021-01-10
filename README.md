@@ -3,7 +3,7 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![PyPi Version](https://img.shields.io/pypi/v/wind-stats)](https://pypi.org/project/wind-stats)
 [![Supported Versions](https://img.shields.io/pypi/pyversions/wind-stats.svg)](https://pypi.org/project/wind-stats)
-[![License: MIT](https://img.shields.io/pypi/l/wind-stats?color=purple)](https://github.com/jules-ch/wind-stats/blob/master/LICENSE)
+[![License: MIT](./docs/_static/license.svg)](https://github.com/jules-ch/wind-stats/blob/master/LICENSE)
 
 
 Wind-stats is a package to easily compute power statistics for your wind energy projects.

@@ -12,6 +12,7 @@ References
 https://globalwindatlas.info/
 Troen, I., & Lundtang Petersen, E. (1989). European Wind Atlas. Risø National Laboratory.
 """
+
 import logging
 import re
 from typing import List, Tuple, Union
@@ -100,7 +101,7 @@ class GWAReader:
         return GWAReader.loads(fp.read())
 
 
-def _compute_weibull_parameters(A: List[float], k: List[float], f: List[float]):
+def _compute_weibull_parameters(A: List[float], k: List[float], f: List[float]) -> Tuple:
 
     r"""Compute global weibull parameters.
 
@@ -149,7 +150,7 @@ def _compute_weibull_parameters(A: List[float], k: List[float], f: List[float]):
     k_solution = root_scalar(equation_k, method="brentq", bracket=[1, 50])
     new_k = k_solution.root
 
-    def equation_A(A):
+    def equation_A(A: float) -> float:
         return A * gamma(1 + 1 / new_k) - M
 
     A_solution = root_scalar(equation_A, method="brentq", bracket=[1, 50])
@@ -169,7 +170,7 @@ def get_weibull_parameters(
     ----------
     ds: xr.Dataset
         dataset read from GWC file.
-    roughness_length:
+    roughness_length: float or list[float]
         array of 12 roughness lengths for each azimuthal wind sector (30°)
         or a global roughness_length.
     height:  float

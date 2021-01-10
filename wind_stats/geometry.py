@@ -28,7 +28,7 @@ def affine_2d_transformation(
     -------
     x, y = coordinates
     """
-    if matrix.shape != (3, 3):
+    if matrix.shape != (3, 3):  # pragma: no cover
         raise ValueError("2D transformation matrix must be of shape [3, 3]")
 
     x, y = coordinates

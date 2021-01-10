@@ -1,14 +1,18 @@
 *.py[cd]
 .coverage
-.idea
 .ipynb_checkpoints
 .mypy_cache
 .pytest_cache
-.vscode
 .venv/
 __pycache__
 build/
 dist/
 docs/generated
-htmlcov/
-coverage.xml
+
+# IDEs
+.idea
+.vscode
+
+# Coverage Files
+htmlcov
+.coverage*

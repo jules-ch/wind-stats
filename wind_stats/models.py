@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, List, Tuple, Union
 import numpy as np
 from pint.quantity import Quantity
 from scipy import stats
-from scipy.integrate import quad
+from scipy import integrate
 from scipy.interpolate import interp1d
 
 from wind_stats.gwa_reader import get_gwc_data, get_weibull_parameters
@@ -51,8 +51,12 @@ def weibull(A: float, k: float) -> stats.weibull_min:
 class PowerCurve:
     """Power curve
 
-    Power in Watts
-    Wind speeds in meter/second
+    Parameters
+    ----------
+    wind_speed: `pint.Quantity`
+        wind speed data
+    wind_speed: `pint.Quantity`
+        power data
     """
 
     @units.check(None, "[speed]", " [power]")
@@ -60,15 +64,34 @@ class PowerCurve:
         self.wind_speed = wind_speed
         self.power = power
 
-    def __call__(self, x):
+    def __call__(self, x) -> Quantity:
         """Linear interpolation
 
-        Value outside the defined curve range will return 0W."""
+        Parameters
+        ----------
+        x: array_like
+            wind speed(s) at which to compute power.
+
+        Returns
+        -------
+        power
+
+        Notes
+        -----
+        Values outside the defined curve range will return 0W.
+        """
+
+        if isinstance(x, Quantity):
+            wind_speed = self.wind_speed.m_as(x)
+            x = x.m
+        else:
+            wind_speed = self.wind_speed.m
 
         interpolate = interp1d(
-            self.wind_speed.m, self.power.m, bounds_error=False, fill_value=0
+            wind_speed, self.power.m, bounds_error=False, fill_value=0
         )
-        return interpolate(x) * self.power.units
+        power = interpolate(x) * self.power.units
+        return power
 
 
 class WindDistribution:
@@ -78,7 +101,9 @@ class WindDistribution:
         self.distribution = distribution
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(mean:{self.mean_wind_speed})"
+        mean = self.mean_wind_speed
+        dist_type = self.distribution.dist.name
+        return f"{self.__class__.__name__}(type: {dist_type}, mean: {mean})"
 
     @classmethod
     def from_data(
@@ -87,9 +112,11 @@ class WindDistribution:
         roughness_length: Union[float, List[float]],
         measurement_height: float,
         height: float,
-    ):
-        # scale wind date with vertical log profile
+    ) -> "WindDistribution":
 
+        """Create KDE WindDistribution based on measurement data."""
+
+        # scale wind date with vertical log profile
         if measurement_height == height:
             data = wind_speed_data
         else:
@@ -97,8 +124,10 @@ class WindDistribution:
                 height, roughness_length, measurement_height, wind_speed_data
             )
 
-        distribution = kde_distribution(data)
-        return cls(distribution)
+        distribution = kde_distribution(data, name="KDE")
+        # freeze distribution to have the same signature as other dists
+        frozen_dist = distribution.freeze()
+        return cls(frozen_dist)
 
     @classmethod
     def from_gwc(
@@ -106,13 +135,15 @@ class WindDistribution:
         gwc_dataset: "xr.Dataset",
         roughness_length: Union[float, List[float]],
         height: float,
-    ):
+    ) -> "WindDistribution":
+        """Create Weibull WindDistribution based on GWC file dataset"""
         A, k, f = get_weibull_parameters(gwc_dataset, roughness_length, height)
         distribution = weibull(A, k)
         return cls(distribution)
 
     @classmethod
-    def weibull(cls, A: float, k: float):
+    def weibull(cls, A: float, k: float) -> "WindDistribution":
+        """Create Weibull WindDistribution"""
         distribution = weibull(A, k)
         return cls(distribution)
 
@@ -124,28 +155,23 @@ class WindDistribution:
     def mean_wind_speed(self) -> Quantity:
         return self.distribution.mean() * units("m/s")
 
-    def get_power_density(self, wind_speed: float):
+    def get_power_density(self, wind_speed: float) -> Quantity:
         return 0.5 * AIR_DENSITY * self.pdf(wind_speed)
 
-    def moment(self, n: int):
+    def moment(self, n: int) -> float:
         return self.distribution.moment(n)
-
-    # def get_max_power_density_wind_speed(self):
-    #     A = self.A
-    #     k = self.k
-    #     return A * ((k + 2) / k) ** (1 / k) * units("m/s")
 
 
 class Site:
-
-    latitude: float
-    longitude: float
-    distribution: WindDistribution
-
-    def __init__(self, latitude, longitude, distribution) -> None:
+    def __init__(
+        self, latitude: float, longitude: float, distribution: WindDistribution
+    ) -> None:
         self.latitude = latitude
         self.longitude = longitude
         self.distribution = distribution
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__}\n GPS Coordinates: latitude:{self.latitude}, longitude: {self.longitude}>"
 
     @classmethod
     def create_gwa_data(
@@ -251,7 +277,7 @@ class WindTurbine:
         def f(wind_speed):
             return distribution.pdf(wind_speed) * self.power_curve(wind_speed).m
 
-        mean_power, _ = quad(
+        mean_power, _ = integrate.quad(
             f,
             min(wind_speeds).m,
             max(wind_speeds).m,

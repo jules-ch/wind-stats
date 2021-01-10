@@ -162,6 +162,15 @@ class WindDistribution:
 
 
 class Site:
+    """Site location
+
+    Attributes
+    ----------
+    latitude
+    longitude
+    distribution: WindDistribution
+    """
+
     def __init__(
         self, latitude: float, longitude: float, distribution: WindDistribution
     ) -> None:
@@ -202,8 +211,12 @@ class Site:
     def get_mean_power_density(self) -> Quantity:
         r"""Get mean power density in W/m²
 
+        Notes
+        -----
+        Mean power density :
+
         .. math::
-            \bar{P} = \frac{1}{2}\rho A^3 * \Gamma(1+\frac{1}{3})
+            \bar{P}_{density} = \frac{1}{2} \cdot \rho \cdot \int_{0}^{\infty}[v^3 pdf(v)] dv
 
         """
 
@@ -268,7 +281,7 @@ class WindTurbine:
         r"""Mean power output
 
         .. math::
-           \bar{P} = \int_{0}^{\infty}[pdf(v) \cdot P(v)] dv
+           \bar{P} = \int_{0}^{\infty}[P(v) \cdot pdf(v)] dv
         """
         distribution = site.distribution
         wind_speeds = self.power_curve.wind_speed
@@ -302,11 +315,14 @@ class WindTurbine:
 
         Notes
         -----
-        The energy producted is the integration of the power production on
-        the wind  speed probability density function over time:
+        The energy produced is the integration of the power production on
+        the wind speed probability density function over time:
 
         .. math::
-           E = \int_{0}^{\infty}[pdf(v) \cdot P(v) \cdot t] dv
+           E = \bar{P} \cdot t
+
+        .. math::
+           E = \int_{0}^{\infty}[P(v) \cdot pdf(v) \cdot t] dv
 
         """
 

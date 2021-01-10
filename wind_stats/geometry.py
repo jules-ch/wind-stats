@@ -7,7 +7,9 @@ from typing import Tuple
 import numpy as np
 
 
-def affine_2d_transformation(coordinates, matrix):
+def affine_2d_transformation(
+    coordinates: Tuple[np.ndarray, np.ndarray], matrix: np.ndarray
+) -> Tuple[np.ndarray, np.ndarray]:
 
     """Numpy based affine 2D transformation.
 
@@ -17,8 +19,10 @@ def affine_2d_transformation(coordinates, matrix):
 
     Parameters
     ----------
-    coordinates: x, y coordinates
-    matrix: transformation matrix [3, 3]
+    coordinates: tuple
+        x, y coordinates
+    matrix:
+        transformation matrix [3, 3]
 
     Returns
     -------
@@ -38,7 +42,7 @@ def rotate(
     angle: float = 0,
     origin: Tuple[float, float] = (0, 0),
     use_radians=False,
-):
+) -> Tuple[np.ndarray, np.ndarray]:
     """Returns rotated coordinates.
     The angle of rotation can be specified in either degrees (default) or
     radians by setting ``use_radians=True``.
@@ -76,7 +80,9 @@ def rotate(
     return affine_2d_transformation(coordinates, matrix)
 
 
-def translate(coordinates, xoff=0.0, yoff=0.0):
+def translate(
+    coordinates: Tuple[np.ndarray, np.ndarray], xoff=0.0, yoff=0.0
+) -> Tuple[np.ndarray, np.ndarray]:
     r"""Returns a translated geometry shifted by offsets along each dimension.
     The general 2D affine transformation matrix for translation is:
         | 1  0  xoff |

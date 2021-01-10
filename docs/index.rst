@@ -11,7 +11,6 @@ Welcome to wind-stats's documentation!
    :caption: Contents:
 
    getting-started
-   shelter_model
    api
 
 

@@ -101,7 +101,9 @@ class GWAReader:
         return GWAReader.loads(fp.read())
 
 
-def _compute_weibull_parameters(A: List[float], k: List[float], f: List[float]) -> Tuple:
+def _compute_weibull_parameters(
+    A: List[float], k: List[float], f: List[float]
+) -> Tuple:
 
     r"""Compute global weibull parameters.
 

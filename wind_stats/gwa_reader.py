@@ -33,7 +33,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-class SupportsRead(Protocol):
+class SupportsRead(Protocol):  # pragma: no cover
     def read(self, amount: int = -1) -> str:
         ...
 
@@ -55,9 +55,12 @@ class GWAReader:
         coordinates_match = re.search(pattern, s)
 
         if coordinates_match:
-            latitude, longitude, _ = map(float, coordinates_match.group(1).split(","))
+            # longitude, latitude which is not consistent with the documentation somehow
+            longitude, latitude, _ = map(float, coordinates_match.group(1).split(","))
         else:
-            raise ValueError("coordinates not found in the GWC file")
+            raise ValueError(
+                "coordinates not found in the GWC file"
+            )  # pragma: no cover
         coordinates = (latitude, longitude)
         roughness_lengths = list(map(float, lines[2].split()))
         heights = list(map(float, lines[3].split()))

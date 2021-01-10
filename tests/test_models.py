@@ -27,9 +27,33 @@ class TestWindDistribution:
         assert wind_distribution
 
     def test_from_data(self):
-        data = stats.norm(loc=6).rvs(1000)
+        test_dist = stats.norm(loc=6)
+        data = test_dist.rvs(10000)
+        wind_distribution = WindDistribution.from_data(data, 0.5, 100.0, 100.0)
+        assert approx(test_dist.mean(), wind_distribution.distribution.mean)
+        # with scaled wind speed
         wind_distribution = WindDistribution.from_data(data, 0.5, 50.0, 100.0)
         assert wind_distribution
+
+    def test_weibull(self):
+        wind_distribution = WindDistribution.weibull(A=6, k=2)
+        assert wind_distribution.distribution.dist.name == "weibull_min"
+        assert wind_distribution.distribution.kwds == {"scale": 6}
+        assert wind_distribution.distribution.args == (2,)
+
+    def test_repr(self):
+        distribution = weibull(6, 2)
+        wind_distribution = WindDistribution(distribution)
+        assert (
+            repr(wind_distribution)
+            == "WindDistribution(type: weibull_min, mean: 5.3174 m/s)"
+        )
+
+    def test_moment(self):
+        # first moment is mean
+        distribution = weibull(6, 2)
+        wind_distribution = WindDistribution(distribution)
+        assert wind_distribution.moment(1) == wind_distribution.distribution.mean()
 
 
 class TestPowerCurve:
@@ -114,15 +138,47 @@ class TestWindTurbine:
         assert turbine.rotor_area.m == approx(13273.23)
         assert turbine.rotor_area.u == units("m**2")
 
-    def test_get_power_coefficients(self, turbine):
-        pass
-
     def test_get_mean_power(self, turbine):
         distribution = weibull(6, 2)
         wind_distribution = WindDistribution(distribution)
 
         site = Site(0, 0, wind_distribution)
         assert turbine.get_mean_power(site).m == approx(852.943)
+
+    def test_get_power_coefficients(self, turbine):
+        ws, cp = turbine.get_power_coefficients()
+
+        assert_array_almost_equal(
+            cp,
+            np.array(
+                [
+                    0.196,
+                    0.354,
+                    0.414,
+                    0.443,
+                    0.455,
+                    0.458,
+                    0.438,
+                    0.381,
+                    0.302,
+                    0.235,
+                    0.185,
+                    0.148,
+                    0.120,
+                    0.099,
+                    0.083,
+                    0.070,
+                    0.059,
+                    0.051,
+                    0.044,
+                    0.038,
+                    0.033,
+                    0.029,
+                    0.026,
+                ]
+            ),
+            decimal=3,
+        )
 
     def test_get_annual_energy_production(self, turbine):
         distribution = weibull(6, 2)

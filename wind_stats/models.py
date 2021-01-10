@@ -298,6 +298,14 @@ class WindTurbine:
         )
         return mean_power * self.power_curve.power.u
 
+    @units.check(None, None, "[time]")
+    def get_energy_production(self, site: Site, time: Quantity):
+        mean_power = self.get_mean_power(site)
+
+        energy = time * mean_power
+
+        return energy.to("Wh")
+
     def get_annual_energy_production(self, site: Site) -> Quantity:
         r"""Get annual energy production.
 
@@ -326,9 +334,4 @@ class WindTurbine:
 
         """
 
-        annual_hours = (1 * units.year).to("hours")
-
-        mean_power = self.get_mean_power(site)
-        annual_energy_production = annual_hours * mean_power
-
-        return annual_energy_production
+        return self.get_energy_production(site, 1 * units.year)

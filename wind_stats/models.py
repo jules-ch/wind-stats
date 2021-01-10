@@ -3,8 +3,7 @@ from typing import TYPE_CHECKING, List, Tuple, Union
 
 import numpy as np
 from pint.quantity import Quantity
-from scipy import stats
-from scipy import integrate
+from scipy import integrate, stats
 from scipy.interpolate import interp1d
 
 from wind_stats.gwa_reader import get_gwc_data, get_weibull_parameters

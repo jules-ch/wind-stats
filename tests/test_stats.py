@@ -5,10 +5,12 @@ from wind_stats.stats import kde_distribution
 
 
 def test_kde_distribution():
-    data = norm.rvs(scale=10, size=1000)
+    # Generate test data
+    test_dist = norm(loc=10.0)
+    data = test_dist.rvs(size=10000)
 
     dist = kde_distribution(data)
 
-    dist.mean() == approx(norm.mean())
-    dist.var() == approx(norm.var())
-    dist.median() == approx(norm.median())
+    assert dist.mean() == approx(test_dist.mean(), rel=1e-1)
+    assert dist.var() == approx(test_dist.var(), rel=1e-1)
+    assert dist.median() == approx(test_dist.median(), rel=1e-1)

@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 @units.check("[area]", "[speed]")
 def wind_power(area: Quantity, wind_speed: Quantity) -> Quantity:
-    """Calculate available wind power
+    """Calculate available wind power.
 
     Parameters
     ----------
@@ -48,7 +48,7 @@ def weibull(A: float, k: float) -> stats.weibull_min:
 
 
 class PowerCurve:
-    """Power curve
+    """Power curve.
 
     Parameters
     ----------
@@ -64,7 +64,7 @@ class PowerCurve:
         self.power = power
 
     def __call__(self, x) -> Quantity:
-        """Linear interpolation
+        """Linear interpolation on the power curve.
 
         Parameters
         ----------
@@ -79,7 +79,6 @@ class PowerCurve:
         -----
         Values outside the defined curve range will return 0W.
         """
-
         if isinstance(x, Quantity):
             wind_speed = self.wind_speed.m_as(x)
             x = x.m
@@ -94,7 +93,7 @@ class PowerCurve:
 
 
 class WindDistribution:
-    """Wind distribution"""
+    """Wind distribution."""
 
     def __init__(self, distribution) -> None:
         self.distribution = distribution
@@ -102,7 +101,7 @@ class WindDistribution:
     def __repr__(self) -> str:
         mean = self.mean_wind_speed
         dist_type = self.distribution.dist.name
-        return f"{self.__class__.__name__}(type: {dist_type}, mean: {mean})"
+        return f"<{self.__class__.__name__}>(type: {dist_type}, mean: {mean})"
 
     @classmethod
     def from_data(
@@ -112,9 +111,7 @@ class WindDistribution:
         measurement_height: float,
         height: float,
     ) -> "WindDistribution":
-
         """Create KDE WindDistribution based on measurement data."""
-
         # scale wind date with vertical log profile
         if measurement_height == height:
             data = wind_speed_data
@@ -135,19 +132,19 @@ class WindDistribution:
         roughness_length: Union[float, List[float]],
         height: float,
     ) -> "WindDistribution":
-        """Create Weibull WindDistribution based on GWC file dataset"""
-        A, k, f = get_weibull_parameters(gwc_dataset, roughness_length, height)
+        """Create Weibull WindDistribution based on GWC file dataset."""
+        A, k, _ = get_weibull_parameters(gwc_dataset, roughness_length, height)
         distribution = weibull(A, k)
         return cls(distribution)
 
     @classmethod
     def weibull(cls, A: float, k: float) -> "WindDistribution":
-        """Create Weibull WindDistribution"""
+        """Create Weibull WindDistribution."""
         distribution = weibull(A, k)
         return cls(distribution)
 
     def pdf(self, x: float) -> float:
-        """Probability density function"""
+        """Probability density function."""
         return self.distribution.pdf(x)
 
     @property
@@ -158,11 +155,12 @@ class WindDistribution:
         return 0.5 * AIR_DENSITY * self.pdf(wind_speed)
 
     def moment(self, n: int) -> float:
+        """Get n-raw moment of the distribution."""
         return self.distribution.moment(n)
 
 
 class Site:
-    """Site location
+    """Site location.
 
     Attributes
     ----------
@@ -179,7 +177,10 @@ class Site:
         self.distribution = distribution
 
     def __repr__(self):
-        return f"<{self.__class__.__name__}\n GPS Coordinates: latitude:{self.latitude}, longitude: {self.longitude}>"
+        return (
+            f"<{self.__class__.__name__}>\n"
+            f"GPS Coordinates: latitude:{self.latitude}, longitude: {self.longitude}"
+        )
 
     @classmethod
     def create_gwa_data(
@@ -189,16 +190,17 @@ class Site:
         roughness_length: Union[float, List[float]],
         height: float,
     ) -> "Site":
-        """Create Site with Global Wind Atlas Data
+        """Create Site with Global Wind Atlas Data.
 
         Retrieve GWA data & initiate Site with Wind distribution.
         """
-
         gwc_data = get_gwc_data(latitude, longitude)
         wind_distribution = WindDistribution.from_gwc(
             gwc_data, roughness_length, height
         )
-        return cls(latitude, longitude, wind_distribution)
+        site = cls(latitude, longitude, wind_distribution)
+        site._gwc_dataset = gwc_data
+        return site
 
     @property
     def mean_wind(self) -> Quantity:
@@ -209,7 +211,7 @@ class Site:
         return self.get_mean_power_density()
 
     def get_mean_power_density(self) -> Quantity:
-        r"""Get mean power density in W/m²
+        r"""Get mean power density in W/m².
 
         Notes
         -----
@@ -219,7 +221,6 @@ class Site:
             \bar{P}_{density} = \frac{1}{2} \cdot \rho \cdot \int_{0}^{\infty}[v^3 pdf(v)] dv
 
         """
-
         return (0.5 * AIR_DENSITY.m * self.distribution.moment(3)) * units("W/m**2")
 
 
@@ -239,7 +240,7 @@ class WindTurbine:
 
     def __repr__(self) -> str:
         return (
-            f"WindTurbine("
+            f"<{self.__class__.__name__}>("
             f"{self.name}, {self.rated_power.to_compact()}, "
             f"height:{self.hub_height}, diameter:{self.diameter})"
         )
@@ -260,8 +261,8 @@ class WindTurbine:
 
         .. math::
             C_p = \frac{P}{\frac{1}{2}\rho A V^{2}}
-        """
 
+        """
         wind_speeds = self.power_curve.wind_speed
         available_wind_power = wind_power(self.rotor_area, self.power_curve.wind_speed)
         cp = self.power_curve.power / available_wind_power
@@ -278,10 +279,19 @@ class WindTurbine:
         )
 
     def get_mean_power(self, site: Site) -> Quantity:
-        r"""Mean power output
+        r"""Mean power output.
 
         .. math::
            \bar{P} = \int_{0}^{\infty}[P(v) \cdot pdf(v)] dv
+
+        Parameters
+        ----------
+        site: Site
+
+        Returns
+        -------
+        `pint.Quantity`
+
         """
         distribution = site.distribution
         wind_speeds = self.power_curve.wind_speed
@@ -300,6 +310,13 @@ class WindTurbine:
 
     @units.check(None, None, "[time]")
     def get_energy_production(self, site: Site, time: Quantity):
+        """Calculate energy output over a period of time.
+        
+        See Also
+        --------
+        get_annual_energy_production:
+            Get energy output over a year.
+        """
         mean_power = self.get_mean_power(site)
 
         energy = time * mean_power
@@ -332,6 +349,9 @@ class WindTurbine:
         .. math::
            E = \int_{0}^{\infty}[P(v) \cdot pdf(v) \cdot t] dv
 
+        See Also
+        --------
+        get_energy_production:
+            Get energy production over any period of time.
         """
-
         return self.get_energy_production(site, 1 * units.year)

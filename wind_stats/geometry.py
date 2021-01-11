@@ -1,6 +1,7 @@
 """Geometry operations module.
 
-Basic affine 2D transformations."""
+Basic affine 2D transformations.
+"""
 from math import cos, pi, sin
 from typing import Tuple
 
@@ -10,7 +11,6 @@ import numpy as np
 def affine_2d_transformation(
     coordinates: Tuple[np.ndarray, np.ndarray], matrix: np.ndarray
 ) -> Tuple[np.ndarray, np.ndarray]:
-
     """Numpy based affine 2D transformation.
 
     [x']   | a  b xoff | [x]
@@ -43,7 +43,8 @@ def rotate(
     origin: Tuple[float, float] = (0, 0),
     use_radians=False,
 ) -> Tuple[np.ndarray, np.ndarray]:
-    """Returns rotated coordinates.
+    """Return rotated coordinates.
+
     The angle of rotation can be specified in either degrees (default) or
     radians by setting ``use_radians=True``.
     Positive angles are counter-clockwise and negative are clockwise rotations.
@@ -83,7 +84,8 @@ def rotate(
 def translate(
     coordinates: Tuple[np.ndarray, np.ndarray], xoff=0.0, yoff=0.0
 ) -> Tuple[np.ndarray, np.ndarray]:
-    r"""Returns a translated geometry shifted by offsets along each dimension.
+    r"""Return a translated geometry shifted by offsets along each dimension.
+
     The general 2D affine transformation matrix for translation is:
         | 1  0  xoff |
         | 0  1  yoff |
@@ -111,7 +113,6 @@ def azimuth_to_cartesian_angle(azimuth: float, radians: bool = False) -> float:
 
     Returns
     -------
-
     angle: float
         cartesian angle between [0...360°] or [0...2π] based on `radians`
         parameter.
@@ -126,8 +127,8 @@ def azimuth_to_cartesian_angle(azimuth: float, radians: bool = False) -> float:
     180
     >>> azimuth_to_regular_angle(270, radians=True)
     3.141592653589793
-    """
 
+    """
     cartesian_angle = (90 - azimuth) % 360
 
     if radians:

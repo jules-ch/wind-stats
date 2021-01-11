@@ -6,7 +6,7 @@ from scipy import integrate, stats
 
 class kde_distribution(stats.rv_continuous):
     """
-    Kernel Density Estimator based distribution using the given data
+    Kernel Density Estimator based distribution using the given data.
 
     A gaussian Kernel Density Estimator (KDE) is used to generate the
     distribution.
@@ -44,9 +44,7 @@ class kde_distribution(stats.rv_continuous):
         return self.kernel.evaluate(x)
 
     def _updated_ctor_param(self):  # pragma: no cover
-        """
-        Set the data as additional constructor argument
-        """
+        """Set the data as additional constructor argument."""
         dct = super(kde_distribution, self)._updated_ctor_param()
         dct["data"] = self._data
         return dct

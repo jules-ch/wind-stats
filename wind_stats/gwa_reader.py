@@ -1,4 +1,4 @@
-"""GWC file reader module
+"""GWC file reader module.
 
 This module provides utilies to read GWC files from Global Wind Atlas.
 Enabling computation of Weibull distribution parameters based on roughness
@@ -41,9 +41,8 @@ class SupportsRead(Protocol):  # pragma: no cover
 class GWAReader:
     @staticmethod
     def loads(s: Union[str, bytes], encoding: str = "ASCII") -> xr.Dataset:
-        """Deserialize s (a str, bytes or bytearray instance containing a
-        GWC document) to Dataset."""
-
+        """Deserialize `s` (a str, bytes or bytearray instance containing
+        a GWC document) to Dataset."""
         if not isinstance(s, str):
             s = s.decode(encoding)
         pattern = "<coordinates>(.*)</coordinates>"
@@ -107,7 +106,6 @@ class GWAReader:
 def _compute_weibull_parameters(
     A: List[float], k: List[float], f: List[float]
 ) -> Tuple:
-
     r"""Compute global weibull parameters.
 
     Computation is based on A, k weibull parameters & frequency for each
@@ -139,8 +137,8 @@ def _compute_weibull_parameters(
     References
     ----------
         - https://orbit.dtu.dk/files/112135732/European_Wind_Atlas.pdf
-    """
 
+    """
     means = [A * gamma(1 + 1 / k) for A, k in zip(A, k)]
     mean_squared = [A ** 2 * gamma(1 + 2 / k) for A, k in zip(A, k)]
     M = np.average(means, weights=f)  # Normalizing the average
@@ -226,15 +224,14 @@ def get_weibull_parameters(
 
 
 def get_gwc_data(latitude: float, longitude: float) -> xr.Dataset:
-
     """Get GWC file from Global Wind Atlas API.
 
     Notes
     -----
     See Global Wind Atlas Term of Use :
     https://globalwindatlas.info/about/TermsOfUse
-    """
 
+    """
     request = Request(
         f"https://globalwindatlas.info/api/gwa/custom/Lib/?lat={latitude}&long={longitude}",
         headers={"Referer": "https://globalwindatlas.info"},

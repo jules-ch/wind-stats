@@ -8,10 +8,7 @@ def vertical_wind_profile(
     reference_wind_speed: float,
     zero_displacement_plane: float = 0.0,
 ) -> float:
-
-    """
-    Log Wind profile
-
+    """Scale wind speed with Log Wind profile.
 
     Parameters
     ----------
@@ -24,13 +21,13 @@ def vertical_wind_profile(
     reference_wind_speed: float
         reference wind speed measured at `reference_height`.
     zero_displacement_plane: float
-        the height at which the mean velocity is zero due to large obstacles such as buildings/canopy.
+        the height at which the mean velocity is zero due to large
+        obstacles such as buildings/canopy.
 
     Returns
     -------
     wind_speed
     """
-
     wind_speed = (
         reference_wind_speed
         * (np.log(height - zero_displacement_plane) / roughness_length)

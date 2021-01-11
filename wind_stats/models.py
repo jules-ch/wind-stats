@@ -267,13 +267,13 @@ class WindTurbine:
         def f(wind_speed):
             return distribution.pdf(wind_speed) * self.power_curve(wind_speed).m
 
-        mean_power, _ = integrate.quad(
+        mean_power = integrate.quad(
             f,
             min(wind_speeds).m,
             max(wind_speeds).m,
             points=wind_speeds.m,
             limit=max(50, len(wind_speeds)),
-        )
+        )[0]
         return mean_power * self.power_curve.power.u
 
     @units.check(None, None, "[time]")

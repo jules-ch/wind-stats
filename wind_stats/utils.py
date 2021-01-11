@@ -1,4 +1,8 @@
 import numpy as np
+from pint import Quantity
+
+from wind_stats.units import units
+from wind_stats.constants import AIR_DENSITY
 
 
 def vertical_wind_profile(
@@ -35,3 +39,22 @@ def vertical_wind_profile(
     )
 
     return wind_speed
+
+
+@units.check("[area]", "[speed]")
+def wind_power(area: Quantity, wind_speed: Quantity) -> Quantity:
+    """Calculate available wind power.
+
+    Parameters
+    ----------
+    area : `pint.Quantity`
+        swept surface
+    wind_speed: `pint.Quantity`
+        wind speed
+
+    Returns
+    -------
+    `pint.Quantity`
+        The available wind power
+    """
+    return (0.5 * AIR_DENSITY * area * wind_speed ** 3).to("W")

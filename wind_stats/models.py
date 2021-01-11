@@ -1,50 +1,21 @@
 import logging
-from typing import TYPE_CHECKING, List, Tuple, Union
+from typing import List, TYPE_CHECKING, Tuple, Union
 
 import numpy as np
 from pint.quantity import Quantity
-from scipy import integrate, stats
+from scipy import integrate
 from scipy.interpolate import interp1d
 
+from wind_stats.constants import AIR_DENSITY
 from wind_stats.gwa_reader import get_gwc_data, get_weibull_parameters
-from wind_stats.stats import kde_distribution
-from wind_stats.utils import vertical_wind_profile
-
-from .constants import AIR_DENSITY
-from .units import units
+from wind_stats.stats import kde_distribution, weibull
+from wind_stats.units import units
+from wind_stats.utils import vertical_wind_profile, wind_power
 
 if TYPE_CHECKING:  # pragma: no cover
     import xarray as xr
 
 logger = logging.getLogger(__name__)
-
-
-@units.check("[area]", "[speed]")
-def wind_power(area: Quantity, wind_speed: Quantity) -> Quantity:
-    """Calculate available wind power.
-
-    Parameters
-    ----------
-    area : `pint.Quantity`
-        swept surface
-    wind_speed: `pint.Quantity`
-        wind speed
-
-    Returns
-    -------
-    `pint.Quantity`
-        The available wind power
-    """
-    return (0.5 * AIR_DENSITY * area * wind_speed ** 3).to("W")
-
-
-def weibull(A: float, k: float) -> stats.weibull_min:
-    r"""Weibull distribution with A, k parameters.
-
-    .. math::
-        f(x) = c \frac{x}{A}^{c-1} \exp(-\frac{x}{A}^c)
-    """
-    return stats.weibull_min(k, scale=A)
 
 
 class PowerCurve:

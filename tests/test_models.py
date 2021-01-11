@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import httpretty
 import numpy as np
 import pytest
 from numpy.testing import assert_array_almost_equal, assert_array_equal
@@ -10,7 +11,7 @@ from wind_stats import GWAReader
 from wind_stats.models import PowerCurve, Site, WindDistribution, WindTurbine, weibull
 from wind_stats.units import units
 
-TEST_DATA = Path(__file__).parent
+test_file = Path(__file__).parent / "gwa3_gwc_test_file.lib"
 
 
 class TestWindDistribution:
@@ -21,7 +22,7 @@ class TestWindDistribution:
         assert wind_distribution.mean_wind_speed == distribution.mean() * units("m/s")
 
     def test_from_gwc(self):
-        with (TEST_DATA / "gwa3_gwc_test_file.lib").open() as f:
+        with test_file.open() as f:
             dataset = GWAReader.load(f)
         wind_distribution = WindDistribution.from_gwc(dataset, 0.5, 100.0)
         assert wind_distribution
@@ -46,7 +47,7 @@ class TestWindDistribution:
         wind_distribution = WindDistribution(distribution)
         assert (
             repr(wind_distribution)
-            == "WindDistribution(type: weibull_min, mean: 5.3174 m/s)"
+            == "<WindDistribution>(type: weibull_min, mean: 5.3174 m/s)"
         )
 
     def test_moment(self):
@@ -63,12 +64,33 @@ class TestPowerCurve:
         powercurve = PowerCurve(windspeed, power)
 
         assert_array_equal(
-            powercurve([1.0, 2.0, 3.0]), units.Quantity([2.0, 4.0, 6.0], "kW")
+            powercurve([1.0, 2.0, 3.0]).m, units.Quantity([2.0, 4.0, 6.0], "kW").m
         )
         assert_array_almost_equal(
-            powercurve(units.Quantity([3.6, 7.2, 10.8], "km/h")),
-            units.Quantity([2.0, 4.0, 6.0], "kW"),
+            powercurve(units.Quantity([3.6, 7.2, 10.8], "km/h")).m,
+            units.Quantity([2.0, 4.0, 6.0], "kW").m,
         )
+
+
+class TestSite:
+    @httpretty.activate
+    def test_create_gwa_data(self):
+        latitude = 49.056
+        longitude = 0.667
+
+        httpretty.register_uri(
+            httpretty.GET,
+            uri=f"https://globalwindatlas.info/api/gwa/custom/Lib/?lat={latitude}&long={longitude}",
+            status=200,
+            content_type="application/octet-stream",
+            body=test_file.read_bytes(),
+        )
+
+        site = Site.create_gwa_data(latitude, longitude, 0.5, 100.0)
+        assert (
+            repr(site) == "<Site>\nGPS Coordinates: latitude:49.056, longitude: 0.667"
+        )
+        assert approx(site.mean_wind.m, units.Quantity(6.4939, "m/s").m)
 
 
 class TestWindTurbine:

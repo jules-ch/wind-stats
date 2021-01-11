@@ -122,9 +122,6 @@ class WindDistribution:
     def mean_wind_speed(self) -> Quantity:
         return self.distribution.mean() * units("m/s")
 
-    def get_power_density(self, wind_speed: float) -> Quantity:
-        return 0.5 * AIR_DENSITY * self.pdf(wind_speed)
-
     def moment(self, n: int) -> float:
         """Get n-raw moment of the distribution."""
         return self.distribution.moment(n)

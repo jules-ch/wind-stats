@@ -48,3 +48,12 @@ class kde_distribution(stats.rv_continuous):
         dct = super(kde_distribution, self)._updated_ctor_param()
         dct["data"] = self._data
         return dct
+
+
+def weibull(A: float, k: float) -> stats.weibull_min:
+    r"""Weibull distribution with A, k parameters.
+
+    .. math::
+        f(x) = c \frac{x}{A}^{c-1} \exp(-\frac{x}{A}^c)
+    """
+    return stats.weibull_min(k, scale=A)

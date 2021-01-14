@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Sequence, Union
 
 import numpy as np
 from scipy import integrate, stats
@@ -21,7 +21,7 @@ class kde_distribution(stats.rv_continuous):
     kernel: `scipy.stats.gaussian_kde`
     """
 
-    def __init__(self, data: Union[list, tuple, np.ndarray], *args, **kwargs) -> None:
+    def __init__(self, data: Union[Sequence[float], np.ndarray], *args, **kwargs) -> None:
 
         self.kernel = stats.gaussian_kde(data, "silverman")
         self._data = self.kernel.dataset
@@ -31,16 +31,16 @@ class kde_distribution(stats.rv_continuous):
         kwargs["b"] = self.b = np.max(data)
         super().__init__(*args, **kwargs)
 
-    def _cdf(self, x, *args):
+    def _cdf(self, x: float, *args) -> float:
         a, b = self._get_support()
         return self.kernel.integrate_box_1d(a, x)
 
-    def _munp(self, n, *args):
+    def _munp(self, n: int, *args) -> float:
         """Compute the n-th non-central moment."""
         a, b = self._get_support()
         return integrate.quad(lambda x: x ** n * self.pdf(x), a, b)[0]
 
-    def _pdf(self, x, *args):
+    def _pdf(self, x: float, *args) -> float:
         return self.kernel.evaluate(x)
 
     def _updated_ctor_param(self):  # pragma: no cover

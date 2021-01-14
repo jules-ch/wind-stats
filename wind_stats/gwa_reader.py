@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 
 class SupportsRead(Protocol):  # pragma: no cover
-    def read(self, amount: int = -1) -> str:
+    def read(self, amount: int = -1) -> str: # noqa
         ...
 
 
@@ -105,7 +105,7 @@ class GWAReader:
 
 def _compute_weibull_parameters(
     A: List[float], k: List[float], f: List[float]
-) -> Tuple:
+) -> Tuple[float, float]:
     r"""Compute global weibull parameters.
 
     Computation is based on A, k weibull parameters & frequency for each

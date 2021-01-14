@@ -21,7 +21,9 @@ class kde_distribution(stats.rv_continuous):
     kernel: `scipy.stats.gaussian_kde`
     """
 
-    def __init__(self, data: Union[Sequence[float], np.ndarray], *args, **kwargs) -> None:
+    def __init__(
+        self, data: Union[Sequence[float], np.ndarray], *args, **kwargs
+    ) -> None:
 
         self.kernel = stats.gaussian_kde(data, "silverman")
         self._data = self.kernel.dataset

@@ -1,5 +1,5 @@
 import logging
-from typing import List, TYPE_CHECKING, Tuple, Union
+from typing import TYPE_CHECKING, List, Tuple, Union
 
 import numpy as np
 from pint.quantity import Quantity
@@ -199,7 +199,9 @@ class Site:
             \bar{P}_{density} = \frac{1}{2} \cdot \rho \cdot \int_{0}^{\infty}[v^3 pdf(v)] dv
 
         """
-        return (0.5 * self.air_density.m * self.distribution.moment(3)) * units("W/m**2")
+        return (0.5 * self.air_density.m * self.distribution.moment(3)) * units(
+            "W/m**2"
+        )
 
 
 class WindTurbine:

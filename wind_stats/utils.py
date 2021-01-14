@@ -1,8 +1,8 @@
 import numpy as np
 from pint import Quantity
 
-from wind_stats.units import units
 from wind_stats.constants import AIR_DENSITY
+from wind_stats.units import units
 
 
 def vertical_wind_profile(

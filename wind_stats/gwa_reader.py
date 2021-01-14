@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 
 class SupportsRead(Protocol):  # pragma: no cover
-    def read(self, amount: int = -1) -> str: # noqa
+    def read(self, amount: int = -1) -> str:  # noqa
         ...
 
 

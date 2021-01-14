@@ -1,5 +1,4 @@
 *.py[cd]
-.coverage
 .ipynb_checkpoints
 .mypy_cache
 .pytest_cache
@@ -15,4 +14,5 @@ docs/generated
 
 # Coverage Files
 htmlcov
-.coverage*
+.coverage
+coverage*

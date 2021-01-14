@@ -34,7 +34,7 @@ class PowerCurve:
         self.wind_speed = wind_speed
         self.power = power
 
-    def __call__(self, x) -> Quantity:
+    def __call__(self, x: Union[float, np.ndarray, Quantity]) -> Quantity:
         """Linear interpolation on the power curve.
 
         Parameters
@@ -138,13 +138,24 @@ class Site:
     """
 
     def __init__(
-        self, latitude: float, longitude: float, distribution: WindDistribution
+        self,
+        latitude: float,
+        longitude: float,
+        distribution: WindDistribution,
+        air_density: Union[Quantity, float, None] = None,
     ) -> None:
         self.latitude = latitude
         self.longitude = longitude
         self.distribution = distribution
 
-    def __repr__(self):
+        if air_density is not None:
+            if isinstance(air_density, Quantity):
+                self.air_density = air_density.to("kg/m**3")
+            else:
+                self.air_density = units.Quantity(air_density, "kg/m**3")
+        self.air_density = air_density or AIR_DENSITY
+
+    def __repr__(self) -> str:
         return (
             f"<{self.__class__.__name__}>\n"
             f"GPS Coordinates: latitude:{self.latitude}, longitude: {self.longitude}"
@@ -167,7 +178,6 @@ class Site:
             gwc_data, roughness_length, height
         )
         site = cls(latitude, longitude, wind_distribution)
-        site._gwc_dataset = gwc_data
         return site
 
     @property
@@ -189,7 +199,7 @@ class Site:
             \bar{P}_{density} = \frac{1}{2} \cdot \rho \cdot \int_{0}^{\infty}[v^3 pdf(v)] dv
 
         """
-        return (0.5 * AIR_DENSITY.m * self.distribution.moment(3)) * units("W/m**2")
+        return (0.5 * self.air_density.m * self.distribution.moment(3)) * units("W/m**2")
 
 
 class WindTurbine:
@@ -264,7 +274,7 @@ class WindTurbine:
         distribution = site.distribution
         wind_speeds = self.power_curve.wind_speed
 
-        def f(wind_speed):
+        def f(wind_speed: float) -> float:
             return distribution.pdf(wind_speed) * self.power_curve(wind_speed).m
 
         mean_power = integrate.quad(
@@ -277,9 +287,27 @@ class WindTurbine:
         return mean_power * self.power_curve.power.u
 
     @units.check(None, None, "[time]")
-    def get_energy_production(self, site: Site, time: Quantity):
-        """Calculate energy output over a period of time.
-        
+    def get_energy_production(self, site: Site, time: Quantity) -> Quantity:
+        r"""Calculate energy output over a period of time.
+
+        Parameters
+        ----------
+        site: Site
+            Site where the wind turbine is located.
+        time: `pint.Quantity`
+            period of time the result energy is produced.
+
+        Notes
+        -----
+        The energy produced is the integration of the power production on
+        the wind speed probability density function over time:
+
+        .. math::
+           E = \bar{P} \cdot t
+
+        .. math::
+           E = \int_{0}^{\infty}[P(v) \cdot pdf(v) \cdot t] dv
+
         See Also
         --------
         get_annual_energy_production:
@@ -292,7 +320,7 @@ class WindTurbine:
         return energy.to("Wh")
 
     def get_annual_energy_production(self, site: Site) -> Quantity:
-        r"""Get annual energy production.
+        """Get annual energy production.
 
         Integrate wind frequency with power curve & annual hours.
 
@@ -305,17 +333,6 @@ class WindTurbine:
         -------
         energy: `pint.Quantity`
             Annual energy to be expected in Wh.
-
-        Notes
-        -----
-        The energy produced is the integration of the power production on
-        the wind speed probability density function over time:
-
-        .. math::
-           E = \bar{P} \cdot t
-
-        .. math::
-           E = \int_{0}^{\infty}[P(v) \cdot pdf(v) \cdot t] dv
 
         See Also
         --------

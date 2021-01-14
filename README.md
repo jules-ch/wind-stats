@@ -10,11 +10,11 @@ Wind-stats is a package to easily compute power statistics for your wind energy 
 
 ## Features
 
-- Read generalized wind climate (GWC) file from Glocal Wind Atlas.
+- Read generalized wind climate (GWC) file from [Glocal Wind Atlas](https://globalwindatlas.info/).
 - Shelter model for wind speed reduction from obstacles.
-- Compute global Weibull parameters based on site.
+- Compute global Weibull parameters based on site location.
 
-- Get general statistics to compare different sites implementation (mean wind speed, mean power density)
+- Get general statistics to compare different sites implementation (mean wind speed, mean power density).
 - Compute annual energy production based on wind turbine power curve & site's wind distribution.
 
 

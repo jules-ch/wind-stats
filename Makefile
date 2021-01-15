@@ -1,4 +1,4 @@
-.PHONY: docs test
+.PHONY: clean format build docs test lint
 
 clean:
 	@rm -rf build dist .eggs *.egg-info
@@ -11,10 +11,14 @@ clean:
 	@find . -type f -name "*.py[co]" -exec rm -rf {} +
 
 format: clean
-	@black wind_stats/ tests/
+	@black wind_stats tests
+	@isort wind_stats tests
 
 build:
 	@poetry build -v
+
+publish:
+	@poetry publish
 
 docs:
 	@rm -rf docs/build docs/generated

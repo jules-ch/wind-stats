@@ -16,8 +16,6 @@ import sys
 sys.path.insert(0, os.path.abspath("."))
 sys.path.insert(0, os.path.abspath(os.path.join("..", "..")))
 
-import sphinx_rtd_theme
-
 import wind_stats
 
 # -- Project information -----------------------------------------------------
@@ -45,6 +43,8 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx_rtd_theme",
     "matplotlib.sphinxext.plot_directive",
+    "IPython.sphinxext.ipython_directive",
+    "IPython.sphinxext.ipython_console_highlighting",
 ]
 
 autosummary_generate = True
@@ -66,9 +66,31 @@ exclude_patterns = ["build"]
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "pydata_sphinx_theme"
+
+html_theme_options = {
+    "github_url": "https://github.com/jules-ch/wind-stats",
+}
+
+html_logo = "_static/logo-wind-stats.png"
+
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
+
+html_css_files = [
+    "css/wind-stats.css",
+]
+
+# numpydoc
+numpydoc_attributes_as_param_list = False
+
+
+# The name of the Pygments (syntax highlighting) style to use.
+pygments_style = "sphinx"
+
+numfig = True
+math_numfig = True
+math_eqref_format = "({number})"

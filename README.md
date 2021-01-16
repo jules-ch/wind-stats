@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://github/jules-ch/wind-stats"><img src="https://raw.githubusercontent.com/jules-ch/wind-stats/main/docs/_static/logo-wind-stats.png" alt="wind-stats"></a>
+  <a href="https://github.com/jules-ch/wind-stats"><img src="https://raw.githubusercontent.com/jules-ch/wind-stats/main/docs/_static/logo-wind-stats.png" alt="wind-stats"></a>
 </p>
 
 -----------------

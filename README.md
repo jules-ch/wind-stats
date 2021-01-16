@@ -8,6 +8,7 @@
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Tests](https://github.com/jules-ch/wind-stats/workflows/Tests/badge.svg)](https://github.com/jules-ch/wind-stats/actions?query=workflow%3ATests)
+[![codecov](https://codecov.io/gh/jules-ch/wind-stats/branch/main/graph/badge.svg)](https://codecov.io/gh/jules-ch/wind-stats)
 [![PyPi Version](https://img.shields.io/pypi/v/wind-stats)](https://pypi.org/project/wind-stats)
 [![Supported Versions](https://img.shields.io/pypi/pyversions/wind-stats.svg)](https://pypi.org/project/wind-stats)
 [![License: MIT](./docs/_static/license.svg)](https://github.com/jules-ch/wind-stats/blob/master/LICENSE)

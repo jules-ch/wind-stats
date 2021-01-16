@@ -13,10 +13,11 @@
 import os
 import sys
 
+import wind_stats
+
 sys.path.insert(0, os.path.abspath("."))
 sys.path.insert(0, os.path.abspath(os.path.join("..", "..")))
 
-import wind_stats
 
 # -- Project information -----------------------------------------------------
 

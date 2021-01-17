@@ -133,19 +133,14 @@ GWC (Global Wind Climate) File can be downloaded through the `Global Wind Atlas`
 
 Or with a downloaded GWC file through `Global Wind Atlas`_ interface:
 
-.. ipython:: python
-    :suppress:
+.. ipython::
+    :verbatim:
 
-    # Change to data directory 
-    import os
-    os.chdir("tests/data")
+    In [14]: from wind_stats import GWAReader
 
-.. ipython:: python
-
-    from wind_stats import GWAReader
-
-    with open("gwa3_gwc_j9mubhkw.lib") as f:
-        gwc_data = GWAReader.load(f)
+    In [15]: with open("gwa3_gwc_j9mubhkw.lib") as f:
+       ....:    gwc_data = GWAReader.load(f)
+       ....:
 
 Weibull A- and k-parameters & frequencies are interpolated provided hub-height & roughness
 length for each wind sector to generate the Weibull wind distribution.
@@ -167,7 +162,7 @@ length for each wind sector to generate the Weibull wind distribution.
     )
     wind_distribution
 
-.. image:: savefig/wind_distribution.png
+.. image:: _static/wind_distribution.png
 
 .. ipython:: python
     :suppress:
@@ -250,6 +245,12 @@ After defining our site we can now evaluate our annual energy output:
 
 .. ipython:: python
 
-    wind_turbine.get_annual_energy_production(site).to("MWh")
+    annual_energy = wind_turbine.get_annual_energy_production(site).to("MWh")
+    print(annual_energy)
+
+.. ipython:: python
+
+    energy = wind_turbine.get_energy_production(site, 3 * units.months).to("MWh")
+    print(energy)
 
 .. _`Global Wind Atlas`: https://globalwindatlas.info/

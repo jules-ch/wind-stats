@@ -42,6 +42,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.mathjax",
+    "sphinx.ext.todo",
     "matplotlib.sphinxext.plot_directive",
     "IPython.sphinxext.ipython_directive",
     "IPython.sphinxext.ipython_console_highlighting",
@@ -94,3 +95,5 @@ pygments_style = "sphinx"
 numfig = True
 math_numfig = True
 math_eqref_format = "({number})"
+
+todo_include_todos = True

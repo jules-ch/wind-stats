@@ -249,15 +249,6 @@ class WindTurbine:
 
         return wind_speeds.m_as("m/s"), cp.m_as(units.dimensionless)
 
-    def annual_energy_distribution(self, site, wind_speeds=np.linspace(0, 25)):
-        distribution = site.distribution
-
-        return (
-            distribution.pdf(wind_speeds)
-            * self.power_curve(wind_speeds)
-            * (1 * units.year).to("hours")
-        )
-
     def get_mean_power(self, site: Site) -> Quantity:
         r"""Mean power output.
 

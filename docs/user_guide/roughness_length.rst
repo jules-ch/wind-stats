@@ -55,3 +55,7 @@ Class index           Short terrain description               z0 (m)
 7           Regular large obstacle coverage (suburb, forest)  1.0
 8           City centre with high- and low-rise buildings     ≥ 2
 =========== ================================================= ======
+
+.. todo::
+
+    Roughness length user guide under construction. 

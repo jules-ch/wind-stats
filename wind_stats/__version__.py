@@ -5,5 +5,5 @@ except ImportError:
 
 try:
     __version__ = version(__package__)
-except PackageNotFoundError:
+except PackageNotFoundError:  # pragma: no cover
     __version__ = "unknown"

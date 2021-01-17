@@ -57,6 +57,7 @@ known_first_party = "wind_stats"
 
 [tool.black]
 line-length = 88
+target-version = ['py36', 'py37', 'py38']
 exclude = '''
 /(
     \.eggs

@@ -168,6 +168,7 @@ class Site:
         longitude: float,
         roughness_length: Union[float, List[float]],
         height: float,
+        **kwargs,
     ) -> "Site":
         """Create Site with Global Wind Atlas Data.
 
@@ -177,7 +178,7 @@ class Site:
         wind_distribution = WindDistribution.from_gwc(
             gwc_data, roughness_length, height
         )
-        site = cls(latitude, longitude, wind_distribution)
+        site = cls(latitude, longitude, wind_distribution, **kwargs)
         return site
 
     @property

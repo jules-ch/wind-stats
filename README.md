@@ -7,7 +7,7 @@
 # Wind stats
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Tests](https://github.com/jules-ch/wind-stats/workflows/Tests/badge.svg)](https://github.com/jules-ch/wind-stats/actions?query=workflow%3ATests)
+[![Tests](https://github.com/jules-ch/wind-stats/workflows/CI/badge.svg)](https://github.com/jules-ch/wind-stats/actions?query=workflow%3ACI)
 [![codecov](https://codecov.io/gh/jules-ch/wind-stats/branch/main/graph/badge.svg)](https://codecov.io/gh/jules-ch/wind-stats)
 [![PyPi Version](https://img.shields.io/pypi/v/wind-stats)](https://pypi.org/project/wind-stats)
 [![Supported Versions](https://img.shields.io/pypi/pyversions/wind-stats.svg)](https://pypi.org/project/wind-stats)

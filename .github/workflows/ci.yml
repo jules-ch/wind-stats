@@ -1,4 +1,4 @@
-name: Tests
+name: CI
 
 on:
   push:
@@ -39,9 +39,6 @@ jobs:
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         run: poetry install
-
-      - name: Run linting
-        run: poetry run make lint
 
       - name: Run Tests
         run: poetry run make test

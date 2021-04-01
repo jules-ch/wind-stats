@@ -1,6 +1,7 @@
+from pytest import approx
+
 from wind_stats.constants import ISA_PRESSURE, ISA_TEMPERATURE
 from wind_stats.utils import calculate_air_density
-from pytest import approx
 
 
 def test_calculate_air_density():

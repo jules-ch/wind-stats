@@ -63,25 +63,22 @@ class GWAReader:
         coordinates = (latitude, longitude)
         roughness_lengths = list(map(float, lines[2].split()))
         heights = list(map(float, lines[3].split()))
-        frequencies = np.asarray(
-            [lines[index].split() for index in (4, 15, 26, 37, 48)], float
-        )
 
         weibull_data_lines = lines[4:]
         data_array = np.asarray([line.split() for line in weibull_data_lines], float)
 
         A_weibull = np.zeros((roughness_classes, heights_count, sectors_count), float)
         k_weibull = np.zeros((roughness_classes, heights_count, sectors_count), float)
-        frequencies = []
+        frequencies = np.zeros((roughness_classes, sectors_count), float)
         for roughness_index in range(roughness_classes):
             index = roughness_index * (heights_count * 2 + 1)
             roughness_data = data_array[index + 1 : index + heights_count * 2 + 1]
+            frequencies[roughness_index] = data_array[index]
+
             for height_index in range(heights_count):
                 A, K = roughness_data[height_index * 2 : (height_index * 2) + 2]
                 A_weibull[roughness_index][height_index] = A
                 k_weibull[roughness_index][height_index] = K
-
-            frequencies.append(data_array[index])
 
         return xr.Dataset(
             {

@@ -8,7 +8,6 @@ from pytest import approx
 from scipy import stats
 
 from wind_stats import GWAReader
-from wind_stats.constants import AIR_DENSITY
 from wind_stats.models import PowerCurve, Site, WindDistribution, WindTurbine, weibull
 from wind_stats.units import units
 
@@ -87,15 +86,13 @@ class TestSite:
             body=test_file.read_bytes(),
         )
 
-        site = Site.create_gwa_data(
-            latitude, longitude, 0.5, 100.0, air_density=AIR_DENSITY
-        )
+        site = Site.create_gwa_data(latitude, longitude, 0.5, 100.0)
         assert (
             repr(site) == "<Site>\nGPS Coordinates: latitude:49.056, longitude: 0.667"
         )
-        assert approx(site.mean_wind, units.Quantity(6.4939, "m/s"))
-        assert approx(
-            site.mean_power_density, units.Quantity(297.862666, "watt / meter ** 2")
+        assert approx(site.mean_wind.m, units.Quantity(6.4939, "m/s").m)
+        assert site.mean_power_density.m == approx(
+            units.Quantity(297.86825, "watt / meter ** 2").m
         )
 
 
@@ -106,31 +103,7 @@ class TestWindTurbine:
     @pytest.fixture
     def turbine(self):
 
-        wind_speed = [
-            3,
-            4,
-            5,
-            6,
-            7,
-            8,
-            9,
-            10,
-            11,
-            12,
-            13,
-            14,
-            15,
-            16,
-            17,
-            18,
-            19,
-            20,
-            21,
-            22,
-            23,
-            24,
-            25,
-        ] * units("m/s")
+        wind_speed = np.arange(3, 26) * units("m/s")
         power = [
             43.0,
             184.0,

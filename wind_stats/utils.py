@@ -1,7 +1,7 @@
 import numpy as np
 from pint import Quantity
 
-from wind_stats.constants import AIR_DENSITY
+from wind_stats.constants import ISA_AIR_DENSITY, Rd, Rv
 from wind_stats.units import units
 
 
@@ -41,8 +41,10 @@ def vertical_wind_profile(
     return wind_speed
 
 
-@units.check("[area]", "[speed]")
-def wind_power(area: Quantity, wind_speed: Quantity) -> Quantity:
+@units.check("[area]", "[speed]", "[density]")
+def wind_power(
+    area: Quantity, wind_speed: Quantity, air_density=ISA_AIR_DENSITY
+) -> Quantity:
     """Calculate available wind power.
 
     Parameters
@@ -51,10 +53,34 @@ def wind_power(area: Quantity, wind_speed: Quantity) -> Quantity:
         swept surface
     wind_speed: `pint.Quantity`
         wind speed
+    air_density: `pint.Quantity`
+        air_density (default to ISA air density)
 
     Returns
     -------
     `pint.Quantity`
         The available wind power
     """
-    return (0.5 * AIR_DENSITY * area * wind_speed ** 3).to("W")
+    return (0.5 * air_density * area * wind_speed ** 3).to("W")
+
+
+@units.check("[temperature]", "[pressure]", None)
+def calculate_air_density(temperature, pressure, relative_humidity):
+
+    """Air density function based on revised formula for the density of moist air."""
+    sat_pressure_0c = 6.112 * units.millibar
+
+    saturation_vapor_pressure = sat_pressure_0c * np.exp(
+        17.67
+        * (temperature - 273.15 * units.kelvin)
+        / (temperature - 29.65 * units.kelvin)
+    )
+
+    vapor_pressure = saturation_vapor_pressure * relative_humidity
+    dry_air_pressure = pressure - vapor_pressure
+
+    air_density = (dry_air_pressure / (Rd * temperature)) + (
+        vapor_pressure / (Rv * temperature)
+    )
+
+    return air_density.to("kg/m**3")

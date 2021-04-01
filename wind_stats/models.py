@@ -6,11 +6,11 @@ from pint.quantity import Quantity
 from scipy import integrate
 from scipy.interpolate import interp1d
 
-from wind_stats.constants import AIR_DENSITY
+from wind_stats.constants import ISA_PRESSURE
 from wind_stats.gwa_reader import get_gwc_data, get_weibull_parameters
 from wind_stats.stats import kde_distribution, weibull
 from wind_stats.units import units
-from wind_stats.utils import vertical_wind_profile, wind_power
+from wind_stats.utils import calculate_air_density, vertical_wind_profile, wind_power
 
 if TYPE_CHECKING:  # pragma: no cover
     import xarray as xr
@@ -142,18 +142,23 @@ class Site:
         latitude: float,
         longitude: float,
         distribution: WindDistribution,
-        air_density: Union[Quantity, float, None] = None,
+        elevation: float = 0.0,
+        avg_temperature=units.Quantity(15, "°C"),
+        avg_humidity: float = 0.0,
     ) -> None:
+
         self.latitude = latitude
         self.longitude = longitude
+        self.elevation = elevation
         self.distribution = distribution
+        self.avg_temperature = avg_temperature
+        self.avg_humidity = avg_humidity
 
-        if air_density is not None:
-            if isinstance(air_density, Quantity):
-                self.air_density = air_density.to("kg/m**3")
-            else:
-                self.air_density = units.Quantity(air_density, "kg/m**3")
-        self.air_density = air_density or AIR_DENSITY
+    @property
+    def air_density(self):
+        return calculate_air_density(
+            self.avg_temperature, ISA_PRESSURE, self.avg_humidity
+        )
 
     def __repr__(self) -> str:
         return (

@@ -15,6 +15,6 @@ Rv = water_gas_constant = R / Mw
 
 # ISA (International Atmosphere)
 
-ISA_TEMPERATURE = 15 * units("°C")
+ISA_TEMPERATURE = units.Quantity(15, units("°C"))
 ISA_PRESSURE = 101.325 * units("kPa")
 ISA_AIR_DENSITY = 1.225 * units("kg/m**3")

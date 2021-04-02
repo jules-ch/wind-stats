@@ -8,6 +8,11 @@ license = "MIT"
 readme = "README.md"
 homepage = "https://github.com/jules-ch/wind-stats"
 
+packages = [
+  {include = "wind_stats"},
+  {include = "wind_stats/py.typed"},
+]
+
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",

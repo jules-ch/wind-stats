@@ -1,3 +1,6 @@
+"""Wind stats base models used in the public API."""
+from __future__ import annotations
+
 import logging
 from typing import TYPE_CHECKING, List, Tuple, Union
 
@@ -14,6 +17,7 @@ from wind_stats.utils import calculate_air_density, vertical_wind_profile, wind_
 
 if TYPE_CHECKING:  # pragma: no cover
     import xarray as xr
+    from scipy.stats import rv_continuous
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +31,28 @@ class PowerCurve:
         wind speed data
     wind_speed: `pint.Quantity`
         power data
+
+    Examples
+    --------
+    >>> power_data = [
+            43.0,
+            184.0,
+            421.0,
+            778.0,
+            1270.0,
+            1905.0,
+            2593.0,
+            3096.0,
+            3268.0,
+            3297.0,
+            3300.0,
+        ] * units.kW
+    >>> wind_speeds = np.arange(3, 13) * units("m/s")
+    >>> power_curve = PowerCurve(wind_speeds, power_data)
+    >>> power_curve(8  * units("m/s"))
+    <Quantity(1905.0, 'kilowatt')>
+    >>> power_curve(40  * units("m/s"))
+    <Quantity(0.0, 'kilowatt')>
     """
 
     @units.check(None, "[speed]", " [power]")
@@ -44,7 +70,7 @@ class PowerCurve:
 
         Returns
         -------
-        power
+        power: `pint.Quantity`
 
         Notes
         -----
@@ -66,7 +92,7 @@ class PowerCurve:
 class WindDistribution:
     """Wind distribution."""
 
-    def __init__(self, distribution) -> None:
+    def __init__(self, distribution: rv_continuous) -> None:
         self.distribution = distribution
 
     def __repr__(self) -> str:
@@ -135,6 +161,8 @@ class Site:
     latitude
     longitude
     distribution: WindDistribution
+    elevation
+    avg_temperature
     """
 
     def __init__(
@@ -188,6 +216,7 @@ class Site:
 
     @property
     def mean_wind(self) -> Quantity:
+        """Mean wind speeds at site in m/s."""
         return self.distribution.mean_wind_speed
 
     @property
@@ -267,7 +296,7 @@ class WindTurbine:
 
         Returns
         -------
-        `pint.Quantity`
+        mean_power: `pint.Quantity`
 
         """
         distribution = site.distribution
@@ -283,7 +312,7 @@ class WindTurbine:
             points=wind_speeds.m,
             limit=max(50, len(wind_speeds)),
         )[0]
-        return mean_power * self.power_curve.power.u
+        return mean_power * self.power_curve.power.units
 
     @units.check(None, None, "[time]")
     def get_energy_production(self, site: Site, time: Quantity) -> Quantity:
@@ -295,6 +324,10 @@ class WindTurbine:
             Site where the wind turbine is located.
         time: `pint.Quantity`
             period of time the result energy is produced.
+
+        Returns
+        -------
+        energy_production: `pint.Quantity`
 
         Notes
         -----

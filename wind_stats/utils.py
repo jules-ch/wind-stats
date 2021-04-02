@@ -1,3 +1,6 @@
+"""Utilities functions."""
+
+
 import numpy as np
 from pint import Quantity
 
@@ -43,7 +46,7 @@ def vertical_wind_profile(
 
 @units.check("[area]", "[speed]", "[density]")
 def wind_power(
-    area: Quantity, wind_speed: Quantity, air_density=ISA_AIR_DENSITY
+    area: Quantity, wind_speed: Quantity, air_density: Quantity = ISA_AIR_DENSITY
 ) -> Quantity:
     """Calculate available wind power.
 
@@ -65,7 +68,9 @@ def wind_power(
 
 
 @units.check("[temperature]", "[pressure]", None)
-def calculate_air_density(temperature, pressure, relative_humidity):
+def calculate_air_density(
+    temperature: Quantity, pressure: Quantity, relative_humidity: float
+):
 
     """Air density function based on revised formula for the density of moist air."""
     sat_pressure_0c = 6.112 * units.millibar

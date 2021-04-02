@@ -31,7 +31,8 @@
 	"extensions": [
 		"ms-python.python",
 		"eamodio.gitlens",
-		"ms-python.vscode-pylance"
+		"ms-python.vscode-pylance",
+		"bungcip.better-toml"
 	],
 
 	"remoteUser": "vscode"

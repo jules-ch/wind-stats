@@ -11,7 +11,7 @@
 [![codecov](https://codecov.io/gh/jules-ch/wind-stats/branch/main/graph/badge.svg)](https://codecov.io/gh/jules-ch/wind-stats)
 [![PyPi Version](https://img.shields.io/pypi/v/wind-stats)](https://pypi.org/project/wind-stats)
 [![Supported Versions](https://img.shields.io/pypi/pyversions/wind-stats.svg)](https://pypi.org/project/wind-stats)
-[![License: MIT](./docs/_static/license.svg)](https://github.com/jules-ch/wind-stats/blob/master/LICENSE)
+[![License: MIT](https://raw.githubusercontent.com/jules-ch/wind-stats/main/docs/_static/license.svg)](https://github.com/jules-ch/wind-stats/blob/master/LICENSE)
 
 
 Wind-stats is a package to easily compute power statistics for your wind energy projects.

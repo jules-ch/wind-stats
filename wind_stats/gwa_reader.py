@@ -231,7 +231,7 @@ def get_gwc_data(latitude: float, longitude: float) -> xr.Dataset:
     try:
         import requests
     except ImportError:
-        raise ImportError("requests is required to use GWA API")
+        raise ImportError("requests is required to use GWA API")  # pragma: no cover
     response = requests.get(
         f"https://globalwindatlas.info/api/gwa/custom/Lib/?lat={latitude}&long={longitude}",
         headers={"Referer": "https://globalwindatlas.info"},

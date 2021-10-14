@@ -98,6 +98,9 @@ GWC (Global Wind Climate) File can be downloaded through the `Global Wind Atlas`
     contains the sector-wise frequency of occurrence of the wind (the wind rose) as well as
     the wind speed frequency distributions in the same sectors (as Weibull A- and k-parameters).
 
+.. important::
+    You need to install `requests` to use `get_gwc_data` function.
+
 
 .. _`Global Wind Atlas`: https://globalwindatlas.info/
 

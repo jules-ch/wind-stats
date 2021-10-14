@@ -15,6 +15,7 @@ Troen, I., & Lundtang Petersen, E. (1989). European Wind Atlas. Risø National L
 
 import logging
 import re
+import ssl
 from typing import List, Tuple, Union
 from urllib.request import Request, urlopen
 
@@ -229,10 +230,14 @@ def get_gwc_data(latitude: float, longitude: float) -> xr.Dataset:
     https://globalwindatlas.info/about/TermsOfUse
 
     """
-    request = Request(
+    try:
+        import requests
+    except ImportError:
+        raise ImportError("requests is required to use GWA API")
+    response = requests.get(
         f"https://globalwindatlas.info/api/gwa/custom/Lib/?lat={latitude}&long={longitude}",
         headers={"Referer": "https://globalwindatlas.info"},
     )
-    with urlopen(request) as f:
-        data = GWAReader.load(f)
+    data = GWAReader.loads(response.content)
+
     return data

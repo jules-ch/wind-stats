@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "wind-stats"
-version = "0.2.0"
+version = "0.3.0"
 description = "Statistics tools to evaluate your wind energy projects"
 authors = ["Jules Chéron <jules.cheron@gmail.com>"]
 license = "MIT"

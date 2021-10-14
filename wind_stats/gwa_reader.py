@@ -15,9 +15,7 @@ Troen, I., & Lundtang Petersen, E. (1989). European Wind Atlas. Risø National L
 
 import logging
 import re
-import ssl
 from typing import List, Tuple, Union
-from urllib.request import Request, urlopen
 
 import numpy as np
 import xarray as xr

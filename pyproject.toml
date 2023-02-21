@@ -32,15 +32,8 @@ dependencies = ["numpy>=1.21", "scipy", "xarray", "pandas", "pint"]
 homepage = "https://github.com/jules-ch/wind-stats"
 
 [project.optional-dependencies]
-test = [
-    "pytest>=7.0.0",
-    "pytest-cov",
-    "isort>=5.6.4",
-    "black>=23.1.0",
-    "mypy>=1.0.0",
-    "ruff",
-    "httpretty>=1.0.5",
-]
+test = ["pytest>=7.0.0", "pytest-cov", "httpretty>=1.0.5", "requests"]
+dev = ["isort>=5.6.4", "black>=23.1.0", "mypy>=1.0.0", "ruff"]
 
 
 [tool.hatch.build]

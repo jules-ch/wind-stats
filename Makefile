@@ -4,6 +4,7 @@ clean:
 	@rm -rf build dist .eggs *.egg-info
 	@rm -rf .benchmarks .coverage coverage.xml htmlcov report.xml
 	@rm -rf .mypy_cache
+	@rm -rf .ruff_cache
 	@rm -rf .ipynb_checkpoints
 	@rm -rf docs/build docs/generated
 	@find . -type d -name '__pycache__' -exec rm -rf {} +

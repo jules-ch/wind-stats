@@ -65,7 +65,7 @@ select = [
     "F", # pyflakes
     # "I",  # isort
     "C", # flake8-comprehensions
-    "B", # flake8-bugbear
+    # "B", # flake8-bugbear
 ]
 ignore = [
     "E501", # line too long, handled by black

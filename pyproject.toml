@@ -1,17 +1,15 @@
-[tool.poetry]
+[build-system]
+requires = ["hatchling>=1.8.0"]
+build-backend = "hatchling.build"
+
+[project]
 name = "wind-stats"
 version = "0.3.0"
 description = "Statistics tools to evaluate your wind energy projects"
-authors = ["Jules Chéron <jules.cheron@gmail.com>"]
+maintainers = [{ name = "Jules Chéron", email = "jules.cheron@gmail.com" }]
 license = "MIT"
 
 readme = "README.md"
-homepage = "https://github.com/jules-ch/wind-stats"
-
-packages = [
-  {include = "wind_stats"},
-  {include = "wind_stats/py.typed"},
-]
 
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -21,39 +19,32 @@ classifiers = [
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Physics",
     "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
 ]
-keywords = [
-    "wind",
-    "energy",
-    "renewables",
-    "statistics"
+keywords = ["wind", "energy", "renewables", "statistics"]
+requires-python = ">=3.8"
+
+dependencies = ["numpy>=1.21", "scipy", "xarray", "pandas", "pint"]
+
+[project.urls]
+homepage = "https://github.com/jules-ch/wind-stats"
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0.0",
+    "pytest-cov",
+    "isort>=5.6.4",
+    "black>=23.1.0",
+    "mypy>=1.0.0",
+    "ruff",
+    "httpretty>=1.0.5",
 ]
 
-[tool.poetry.dependencies]
-python = "^3.7"
-scipy = "^1.5.4"
-numpy = "^1.19.4"
-xarray = "^0.17.0"
-Pint = "^0.17.0"
-typing-extensions = {version = "^3.7.4", python = "<3.8"}
-importlib-metadata = {version = "^3.4.0", python = "<3.8"}
 
-[tool.poetry.dev-dependencies]
-pytest = "^6.2.2"
-isort = "^5.8.0"
-black = "^21.5b1"
-pytest-cov = "^2.11.1"
-mypy = "^0.812"
-flake8 = "^3.9.0"
-httpretty = "^1.0.5"
-requests = "^2.26.0"
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+[tool.hatch.build]
+include = ["wind_stats/*"]
 
 [tool.isort]
 profile = "black"
@@ -61,7 +52,7 @@ known_first_party = "wind_stats"
 
 [tool.black]
 line-length = 88
-target-version = ['py37', 'py38']
+target-version = ['py37', 'py38', 'py39']
 exclude = '''
 /(
     \.eggs
@@ -72,3 +63,18 @@ exclude = '''
   | dist
 )/
 '''
+
+[tool.ruff]
+select = [
+    "E", # pycodestyle errors
+    "W", # pycodestyle warnings
+    "F", # pyflakes
+    # "I",  # isort
+    "C", # flake8-comprehensions
+    "B", # flake8-bugbear
+]
+ignore = [
+    "E501", # line too long, handled by black
+    "B008", # do not perform function calls in argument defaults
+    "C901", # too complex
+]

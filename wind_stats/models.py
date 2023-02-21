@@ -5,7 +5,7 @@ import logging
 from typing import TYPE_CHECKING, List, Tuple, Union
 
 import numpy as np
-from pint.quantity import Quantity
+from pint import Quantity
 from scipy import integrate
 from scipy.interpolate import interp1d
 
@@ -174,7 +174,6 @@ class Site:
         avg_temperature=units.Quantity(15, "°C"),
         avg_humidity: float = 0.0,
     ) -> None:
-
         self.latitude = latitude
         self.longitude = longitude
         self.elevation = elevation
@@ -263,7 +262,7 @@ class WindTurbine:
     @property
     def rotor_area(self) -> Quantity:
         """Swept rotor area."""
-        return np.pi * self.diameter ** 2 / 4
+        return np.pi * self.diameter**2 / 4
 
     def get_power_coefficients(self) -> Tuple[np.ndarray, np.ndarray]:
         r"""Get Cp coefficients for wind speeds defined in the power curve.

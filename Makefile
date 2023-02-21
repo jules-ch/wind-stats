@@ -4,6 +4,7 @@ clean:
 	@rm -rf build dist .eggs *.egg-info
 	@rm -rf .benchmarks .coverage coverage.xml htmlcov report.xml
 	@rm -rf .mypy_cache
+	@rm -rf .ruff_cache
 	@rm -rf .ipynb_checkpoints
 	@rm -rf docs/build docs/generated
 	@find . -type d -name '__pycache__' -exec rm -rf {} +
@@ -15,7 +16,10 @@ format: clean
 	@isort wind_stats tests
 
 build:
-	@poetry build -v
+	@python -m build
+
+install:
+	@python -m pip install -e .[test]
 
 publish:
 	@poetry publish
@@ -29,6 +33,6 @@ test:
 
 lint:
 	@mypy wind_stats
-	@flake8 wind_stats tests
+	@ruff check wind_stats tests
 	@black wind_stats tests --check
 	@isort wind_stats tests --check-only

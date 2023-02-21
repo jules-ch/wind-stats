@@ -31,7 +31,9 @@ class TestWindDistribution:
         test_dist = stats.norm(loc=6)
         data = test_dist.rvs(10000)
         wind_distribution = WindDistribution.from_data(data, 0.5, 100.0, 100.0)
-        assert approx(test_dist.mean(), wind_distribution.distribution.mean)
+        assert test_dist.mean() == approx(
+            wind_distribution.distribution.mean(), abs=1e-1
+        )
         # with scaled wind speed
         wind_distribution = WindDistribution.from_data(data, 0.5, 50.0, 100.0)
         assert wind_distribution
@@ -90,19 +92,17 @@ class TestSite:
         assert (
             repr(site) == "<Site>\nGPS Coordinates: latitude:49.056, longitude: 0.667"
         )
-        assert approx(site.mean_wind.m, units.Quantity(6.4939, "m/s").m)
+        assert site.mean_wind.m == approx(units.Quantity(6.49391698, "m/s").m)
         assert site.mean_power_density.m == approx(
             units.Quantity(297.86825, "watt / meter ** 2").m
         )
 
 
 class TestWindTurbine:
-
     # https://en.wind-turbine-models.com/turbines/1467-siemens-swt-3.3-130-ln
     # Power curve data
     @pytest.fixture
     def turbine(self):
-
         wind_speed = np.arange(3, 26) * units("m/s")
         power = [
             43.0,

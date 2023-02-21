@@ -29,7 +29,8 @@ requires-python = ">=3.8"
 dependencies = ["numpy>=1.21", "scipy", "xarray", "pandas", "pint"]
 
 [project.urls]
-homepage = "https://github.com/jules-ch/wind-stats"
+Homepage = "https://github.com/jules-ch/wind-stats"
+Documentation = "https://wind-stats.readthedocs.io/"
 
 [project.optional-dependencies]
 test = ["pytest>=7.0.0", "pytest-cov", "httpretty>=1.0.5", "requests"]

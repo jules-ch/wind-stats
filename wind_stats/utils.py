@@ -64,14 +64,13 @@ def wind_power(
     `pint.Quantity`
         The available wind power
     """
-    return (0.5 * air_density * area * wind_speed ** 3).to("W")
+    return (0.5 * air_density * area * wind_speed**3).to("W")
 
 
 @units.check("[temperature]", "[pressure]", None)
 def calculate_air_density(
     temperature: Quantity, pressure: Quantity, relative_humidity: float
 ):
-
     """Air density function based on revised formula for the density of moist air."""
     sat_pressure_0c = 6.112 * units.millibar
 

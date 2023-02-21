@@ -18,7 +18,6 @@ def test_get_weibull_parameters():
 
 @httpretty.activate
 def test_get_gwa_data():
-
     latitude = 49.056
     longitude = 0.667
 

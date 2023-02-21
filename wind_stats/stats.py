@@ -27,7 +27,6 @@ class kde_distribution(stats.rv_continuous):
     def __init__(
         self, data: Union[Sequence[float], np.ndarray], *args, **kwargs
     ) -> None:
-
         self.kernel = stats.gaussian_kde(data, "silverman")
         self._data = self.kernel.dataset
 
@@ -43,7 +42,7 @@ class kde_distribution(stats.rv_continuous):
     def _munp(self, n: int, *args) -> float:
         """Compute the n-th non-central moment."""
         a, b = self._get_support()
-        return integrate.quad(lambda x: x ** n * self.pdf(x), a, b)[0]
+        return integrate.quad(lambda x: x**n * self.pdf(x), a, b)[0]
 
     def _pdf(self, x: float, *args) -> float:
         return self.kernel.evaluate(x)

@@ -13,20 +13,22 @@ https://globalwindatlas.info/
 Troen, I., & Lundtang Petersen, E. (1989). European Wind Atlas. Risø National Laboratory.
 """
 
+from __future__ import annotations
+
 import logging
 import re
-from typing import List, Tuple, Union
+from typing import Union
 
 import numpy as np
 import xarray as xr
-from scipy.interpolate import interp2d
-from scipy.interpolate.interpolate import interp1d
+from scipy.interpolate import RegularGridInterpolator as RGI
+from scipy.interpolate import interp1d
 from scipy.optimize import root_scalar
 from scipy.special import gamma
 
 try:
     from typing import Protocol
-except ImportError:
+except ImportError:  # pragma: no cover
     from typing_extensions import Protocol  # type: ignore
 
 logger = logging.getLogger(__name__)
@@ -100,8 +102,8 @@ class GWAReader:
 
 
 def _compute_weibull_parameters(
-    A: List[float], k: List[float], f: List[float]
-) -> Tuple[float, float]:
+    A: list[float], k: list[float], f: list[float]
+) -> tuple[float, float]:
     r"""Compute global weibull parameters.
 
     Computation is based on A, k weibull parameters & frequency for each
@@ -135,8 +137,8 @@ def _compute_weibull_parameters(
         - https://orbit.dtu.dk/files/112135732/European_Wind_Atlas.pdf
 
     """
-    means = [A * gamma(1 + 1 / k) for A, k in zip(A, k)]
-    mean_squared = [A ** 2 * gamma(1 + 2 / k) for A, k in zip(A, k)]
+    means = [A * gamma(1 + 1 / k) for A, k in zip(A, k, strict=True)]
+    mean_squared = [A ** 2 * gamma(1 + 2 / k) for A, k in zip(A, k, strict=True)]
     M = np.average(means, weights=f)  # Normalizing the average
     u2 = np.average(mean_squared, weights=f)  # Normalizing the average
 
@@ -158,8 +160,8 @@ def _compute_weibull_parameters(
 
 
 def get_weibull_parameters(
-    ds: xr.Dataset, roughness_length: Union[List[float], float], height: float
-) -> Tuple[float, float, List[float]]:
+    ds: xr.Dataset, roughness_length: Union[list[float], float], height: float
+) -> tuple[float, float, list[float]]:
     """Get A, k Weibull parameters based on GWA dataset files.
 
     It computes based on roughness length & height for each wind rose
@@ -181,9 +183,9 @@ def get_weibull_parameters(
         Global weibull parameters & normalized frequencies for each sector.
     """
 
-    A_parameters = []
-    k_parameters = []
-    f_parameters = []
+    A_parameters: list[float] = []
+    k_parameters: list[float] = []
+    f_parameters: list[float] = []
 
     if isinstance(roughness_length, float):
         roughness_length = [roughness_length] * 12
@@ -200,12 +202,15 @@ def get_weibull_parameters(
             new_log_roughness = np.nan_to_num(np.log(roughness))
         new_log_height = np.log(height)
 
-        new_A = interp2d(log_height, log_roughness, A)(
-            new_log_height, new_log_roughness
-        ).item()
-        new_k = interp2d(log_height, log_roughness, k)(
-            new_log_height, new_log_roughness
-        ).item()
+        # Use of RGI replacing interp2d from scipy
+        r = RGI(
+            (log_height, log_roughness), A.T.values, method="linear", bounds_error=False
+        )
+        new_A = r((new_log_height, new_log_roughness)).item()
+        r = RGI(
+            (log_height, log_roughness), k.T.values, method="linear", bounds_error=False
+        )
+        new_k = r((new_log_height, new_log_roughness)).item()
 
         frequencies = sector_data.frequency
 
@@ -230,8 +235,10 @@ def get_gwc_data(latitude: float, longitude: float) -> xr.Dataset:
     """
     try:
         import requests
-    except ImportError:
-        raise ImportError("requests is required to use GWA API")  # pragma: no cover
+    except ImportError: # pragma: no cover
+        raise ImportError(
+            "requests is required to use GWA API"
+        ) from None
     response = requests.get(
         f"https://globalwindatlas.info/api/gwa/custom/Lib/?lat={latitude}&long={longitude}",
         headers={"Referer": "https://globalwindatlas.info"},

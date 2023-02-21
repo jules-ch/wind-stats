@@ -137,8 +137,8 @@ def _compute_weibull_parameters(
         - https://orbit.dtu.dk/files/112135732/European_Wind_Atlas.pdf
 
     """
-    means = [A * gamma(1 + 1 / k) for A, k in zip(A, k, strict=True)]
-    mean_squared = [A**2 * gamma(1 + 2 / k) for A, k in zip(A, k, strict=True)]
+    means = [A * gamma(1 + 1 / k) for A, k in zip(A, k)]
+    mean_squared = [A**2 * gamma(1 + 2 / k) for A, k in zip(A, k)]
     M = np.average(means, weights=f)  # Normalizing the average
     u2 = np.average(mean_squared, weights=f)  # Normalizing the average
 

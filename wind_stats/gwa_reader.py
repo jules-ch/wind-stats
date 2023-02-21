@@ -138,7 +138,7 @@ def _compute_weibull_parameters(
 
     """
     means = [A * gamma(1 + 1 / k) for A, k in zip(A, k, strict=True)]
-    mean_squared = [A ** 2 * gamma(1 + 2 / k) for A, k in zip(A, k, strict=True)]
+    mean_squared = [A**2 * gamma(1 + 2 / k) for A, k in zip(A, k, strict=True)]
     M = np.average(means, weights=f)  # Normalizing the average
     u2 = np.average(mean_squared, weights=f)  # Normalizing the average
 
@@ -146,7 +146,7 @@ def _compute_weibull_parameters(
     logger.debug("Solving A,k parameters")
 
     def equation_k(k: float) -> float:
-        return (gamma(1 + 1 / k) ** 2 / gamma(1 + 2 / k)) - (M ** 2 / u2)
+        return (gamma(1 + 1 / k) ** 2 / gamma(1 + 2 / k)) - (M**2 / u2)
 
     k_solution = root_scalar(equation_k, method="brentq", bracket=[1, 50])
     new_k = k_solution.root
@@ -235,10 +235,8 @@ def get_gwc_data(latitude: float, longitude: float) -> xr.Dataset:
     """
     try:
         import requests
-    except ImportError: # pragma: no cover
-        raise ImportError(
-            "requests is required to use GWA API"
-        ) from None
+    except ImportError:  # pragma: no cover
+        raise ImportError("requests is required to use GWA API") from None
     response = requests.get(
         f"https://globalwindatlas.info/api/gwa/custom/Lib/?lat={latitude}&long={longitude}",
         headers={"Referer": "https://globalwindatlas.info"},

@@ -29,7 +29,7 @@ author = "Jules Chéron"
 release = wind_stats.__version__
 
 
-needs_sphinx = "3.0"
+needs_sphinx = "4.3"
 
 # -- General configuration ---------------------------------------------------
 
@@ -43,7 +43,6 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.mathjax",
     "sphinx.ext.todo",
-    "numpydoc",
     "matplotlib.sphinxext.plot_directive",
     "IPython.sphinxext.ipython_directive",
     "IPython.sphinxext.ipython_console_highlighting",
@@ -72,6 +71,8 @@ html_theme = "pydata_sphinx_theme"
 
 html_theme_options = {
     "github_url": "https://github.com/jules-ch/wind-stats",
+    "use_edit_page_button": False,
+    "collapse_navigation": True
 }
 
 html_logo = "_static/logo-wind-stats.png"
@@ -83,7 +84,7 @@ html_logo = "_static/logo-wind-stats.png"
 html_static_path = ["_static"]
 
 html_css_files = [
-    "css/wind-stats.css",
+    "wind-stats.css",
 ]
 
 # numpydoc

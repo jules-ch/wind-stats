@@ -15,7 +15,10 @@ format: clean
 	@isort wind_stats tests
 
 build:
-	@poetry build -v
+	@python -m build
+
+install:
+	@python -m pip install -e .[test]
 
 publish:
 	@poetry publish
@@ -29,6 +32,6 @@ test:
 
 lint:
 	@mypy wind_stats
-	@flake8 wind_stats tests
+	@ruff check wind_stats tests
 	@black wind_stats tests --check
 	@isort wind_stats tests --check-only

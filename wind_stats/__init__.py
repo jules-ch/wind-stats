@@ -4,6 +4,7 @@ from .models import PowerCurve, Site, WindDistribution, WindTurbine
 from .units import units
 
 __all__ = [
+    "__version__",
     "Site",
     "WindTurbine",
     "WindDistribution",

@@ -20,28 +20,25 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+          cache: "pip"
+          cache-dependency-path: pyproject.toml
 
-      - name: Setup Poetry
-        uses: abatilo/actions-poetry@v2.1.0
-        with:
-          poetry-version: 1.1.5
-
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         id: cache
         with:
-          path: ~/.cache/pypoetry/virtualenvs
-          key: poetry-${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.os }}-python-${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}
 
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        run: poetry install
+        run: pip install -e .[test]
 
       - name: Run Tests
-        run: poetry run make test
+        run: make test
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1

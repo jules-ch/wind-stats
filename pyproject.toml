@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "wind-stats"
-version = "0.3.0"
+version = "0.3.1"
 description = "Statistics tools to evaluate your wind energy projects"
 maintainers = [{ name = "Jules Chéron", email = "jules.cheron@gmail.com" }]
 license = "MIT"

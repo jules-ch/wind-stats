@@ -1,9 +1,8 @@
 from pathlib import Path
 
-import httpretty
 import numpy as np
 from numpy.testing import assert_array_equal
-
+import responses
 from wind_stats.gwa_reader import GWAReader, get_gwc_data, get_weibull_parameters
 
 test_file = Path(__file__).parent / "gwa3_gwc_test_file.lib"
@@ -16,14 +15,14 @@ def test_get_weibull_parameters():
     assert A, k
 
 
-@httpretty.activate
+@responses.activate
 def test_get_gwa_data():
     latitude = 49.056
     longitude = 0.667
 
-    httpretty.register_uri(
-        httpretty.GET,
-        uri=f"https://globalwindatlas.info/api/gwa/custom/Lib/?lat={latitude}&long={longitude}",
+    responses.add(
+        responses.GET,
+        url=f"https://globalwindatlas.info/api/gwa/custom/Lib/?lat={latitude}&long={longitude}",
         status=200,
         content_type="application/octet-stream",
         body=test_file.read_bytes(),

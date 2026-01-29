@@ -17,18 +17,11 @@ jobs:
       - name: Get tags
         run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.x
-
-      - name: Setup Poetry
-        uses: abatilo/actions-poetry@v2.1.0
-        with:
-          poetry-version: 1.1.4
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v7
 
       - name: Build Package
-        run: poetry build
+        run: uvx --from build pyproject-build
 
       - name: Publish Package
         uses: pypa/gh-action-pypi-publish@v1.4.1

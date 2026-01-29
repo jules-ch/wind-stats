@@ -7,9 +7,10 @@ Attributes
 units: `pint.UnitRegistry`
 
 """
+
 from pint import UnitRegistry
 
-units = UnitRegistry(autoconvert_offset_to_baseunit=True)
+units: UnitRegistry = UnitRegistry(autoconvert_offset_to_baseunit=True)
 units.default_format = ".5g~P"
 
 units.define("@alias hour = h")

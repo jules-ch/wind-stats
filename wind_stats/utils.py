@@ -1,6 +1,5 @@
 """Utilities functions."""
 
-
 import numpy as np
 from pint import Quantity
 

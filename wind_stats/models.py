@@ -1,4 +1,5 @@
 """Wind stats base models used in the public API."""
+
 from __future__ import annotations
 
 import logging

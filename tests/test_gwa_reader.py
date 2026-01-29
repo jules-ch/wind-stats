@@ -1,8 +1,9 @@
 from pathlib import Path
 
 import numpy as np
-from numpy.testing import assert_array_equal
 import responses
+from numpy.testing import assert_array_equal
+
 from wind_stats.gwa_reader import GWAReader, get_gwc_data, get_weibull_parameters
 
 test_file = Path(__file__).parent / "gwa3_gwc_test_file.lib"

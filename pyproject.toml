@@ -58,7 +58,7 @@ exclude = '''
 )/
 '''
 
-[tool.ruff]
+[tool.ruff.lint]
 select = [
     "E", # pycodestyle errors
     "W", # pycodestyle warnings

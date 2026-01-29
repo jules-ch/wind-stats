@@ -1,8 +1,8 @@
-import responses
 from pathlib import Path
 
 import numpy as np
 import pytest
+import responses
 from numpy.testing import assert_array_almost_equal, assert_array_equal
 from pytest import approx
 from scipy import stats

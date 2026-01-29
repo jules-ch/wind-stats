@@ -1,3 +1,4 @@
+import responses
 from pathlib import Path
 
 import httpretty
@@ -75,14 +76,14 @@ class TestPowerCurve:
 
 
 class TestSite:
-    @httpretty.activate
+    @responses.activate
     def test_create_gwa_data(self):
         latitude = 49.056
         longitude = 0.667
 
-        httpretty.register_uri(
-            httpretty.GET,
-            uri=f"https://globalwindatlas.info/api/gwa/custom/Lib/?lat={latitude}&long={longitude}",
+        responses.add(
+            responses.GET,
+            url=f"https://globalwindatlas.info/api/gwa/custom/Lib/?lat={latitude}&long={longitude}",
             status=200,
             content_type="application/octet-stream",
             body=test_file.read_bytes(),
